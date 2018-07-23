@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="10"/>
+    <BuildModes Active="Default"/>
+    <Units Count="44">
+      <Unit0>
+        <Filename Value="handmadehero.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <TopLine Value="4"/>
+        <CursorPos X="26" Y="13"/>
+        <UsageCount Value="76"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="GameWindow.pas"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="126"/>
+        <CursorPos X="7" Y="141"/>
+        <FoldState Value=" T3O0x4 T1jB02Y"/>
+        <UsageCount Value="29"/>
+        <Loaded Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\rtl\win64\system.pp"/>
+        <UnitName Value="System"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="226"/>
+        <CursorPos Y="173"/>
+        <UsageCount Value="7"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\packages\fv\src\memory.pas"/>
+        <UnitName Value="Memory"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="382"/>
+        <UsageCount Value="7"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="Bitmap.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="84"/>
+        <CursorPos X="40" Y="68"/>
+        <UsageCount Value="20"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="..\..\Handmadehero-oxygene\Handmadehero-oxygene\win32_hmh.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="7"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="GlOBAL.pas"/>
+        <UnitName Value="GLOBAL"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="7"/>
+        <CursorPos X="4" Y="32"/>
+        <UsageCount Value="17"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\rtl\objpas\sysutils\sysutilh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="301"/>
+        <CursorPos X="13" Y="321"/>
+        <UsageCount Value="9"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\rtl\win\wininc\messages.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1035"/>
+        <CursorPos X="6" Y="965"/>
+        <UsageCount Value="7"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\rtl\win\wininc\base.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="192"/>
+        <CursorPos X="20" Y="295"/>
+        <UsageCount Value="9"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\rtl\win\sysosh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="4"/>
+        <CursorPos X="3" Y="19"/>
+        <UsageCount Value="7"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="C:\lazarus\ide\sourceeditor.pp"/>
+        <UnitName Value="SourceEditor"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2748"/>
+        <UsageCount Value="7"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="C:\lazarus\ide\definesgui.lfm"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="29"/>
+        <CursorPos X="34" Y="18"/>
+        <UsageCount Value="7"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="..\..\gpc\p\demos\bigsetsdemo.pas"/>
+        <UnitName Value="BigSetsDemo"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="97" Y="23"/>
+        <UsageCount Value="9"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="..\..\gpc\p\demos\bigmemdemo.pas"/>
+        <UnitName Value="BigMemDemo"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="18"/>
+        <CursorPos X="27" Y="33"/>
+        <UsageCount Value="9"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\rtl\win\wininc\redef.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="782"/>
+        <CursorPos X="10" Y="794"/>
+        <UsageCount Value="10"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\rtl\win\wininc\struct.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2970"/>
+        <CursorPos X="6" Y="2984"/>
+        <UsageCount Value="10"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="..\..\TArray2.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2"/>
+        <CursorPos X="23" Y="15"/>
+        <UsageCount Value="9"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="..\..\Island of Phoenix\IslandRTL\Source\rpmalloc.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="331"/>
+        <CursorPos X="78" Y="2"/>
+        <UsageCount Value="9"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="..\..\Island of Phoenix\IslandRTL\Source\Tuples.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="27" Y="6"/>
+        <UsageCount Value="9"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="..\..\Island of Phoenix\IslandRTL-Extensions\Source\Tuples.pas"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <CursorPos X="42" Y="23"/>
+        <UsageCount Value="9"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="..\..\Island of Phoenix\IslandRTL-master\Source\Tuples.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="149"/>
+        <CursorPos X="30" Y="14"/>
+        <UsageCount Value="13"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="..\..\TBigSet.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="9"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="..\..\Island of Phoenix\IslandRTL-master\Source\Types.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="61"/>
+        <CursorPos X="9" Y="99"/>
+        <UsageCount Value="13"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="..\..\IslandRTL-Extensions\Source\Types.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="100"/>
+        <UsageCount Value="10"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="..\..\IslandRTL-Extensions\Source\FileStream.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="181"/>
+        <UsageCount Value="10"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="..\..\IslandRTL\Source\Tuples.pas"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="557"/>
+        <UsageCount Value="10"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="..\..\Handmadehero - Oxygene\Globals.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="..\..\Handmadehero - Oxygene\Input.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="7"/>
+        <CursorPos X="21" Y="17"/>
+        <UsageCount Value="10"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="..\..\tmp hmh files\Window.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="9" Y="8"/>
+        <UsageCount Value="10"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="..\..\tmp hmh files\Globals.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="3"/>
+        <CursorPos X="10" Y="4"/>
+        <UsageCount Value="10"/>
+      </Unit30>
+      <Unit31>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\packages\palmunits\src\window.pp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="10"/>
+        <UsageCount Value="10"/>
+      </Unit31>
+      <Unit32>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\rtl\win64\windows.pp"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit32>
+      <Unit33>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\packages\amunits\src\coreunits\input.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="..\..\tmp hmh files\Input.pas"/>
+        <UnitName Value="GameInput"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2"/>
+        <CursorPos X="30" Y="4"/>
+        <UsageCount Value="10"/>
+      </Unit34>
+      <Unit35>
+        <Filename Value="GameInput.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="39" Y="14"/>
+        <UsageCount Value="10"/>
+      </Unit35>
+      <Unit36>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\rtl\inc\typshrdh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="135"/>
+        <CursorPos X="17" Y="153"/>
+        <UsageCount Value="10"/>
+      </Unit36>
+      <Unit37>
+        <Filename Value="D:\Handmadehero - Oxygene - WORKING\Sound.pas"/>
+        <UnitName Value="GameSound"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="266"/>
+        <CursorPos X="5" Y="289"/>
+        <UsageCount Value="10"/>
+      </Unit37>
+      <Unit38>
+        <Filename Value="GameSound.pas"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="152"/>
+        <CursorPos X="31" Y="182"/>
+        <FoldState Value=" TCBL45 T3ie8C01116Y"/>
+        <UsageCount Value="15"/>
+        <Loaded Value="True"/>
+      </Unit38>
+      <Unit39>
+        <Filename Value="D:\Handmadehero - Oxygene - WORKING\Globals.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit39>
+      <Unit40>
+        <Filename Value="DirectX\DirectSound.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1816"/>
+        <CursorPos X="3" Y="398"/>
+        <FoldState Value=" TCl8JPG"/>
+        <UsageCount Value="10"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\packages\winunits-base\src\mmsystem.pp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1097"/>
+        <CursorPos X="44" Y="1108"/>
+        <UsageCount Value="10"/>
+      </Unit41>
+      <Unit42>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\rtl\inc\mathh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="82"/>
+        <CursorPos X="14" Y="95"/>
+        <UsageCount Value="10"/>
+      </Unit42>
+      <Unit43>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\rtl\objpas\math.pp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="826"/>
+        <CursorPos X="15" Y="805"/>
+        <UsageCount Value="10"/>
+      </Unit43>
+    </Units>
+    <JumpHistory Count="30" HistoryIndex="29">
+      <Position1>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="71" TopLine="59"/>
+      </Position1>
+      <Position2>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="74" TopLine="59"/>
+      </Position2>
+      <Position3>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="71" TopLine="59"/>
+      </Position3>
+      <Position4>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="74" TopLine="59"/>
+      </Position4>
+      <Position5>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="73" TopLine="59"/>
+      </Position5>
+      <Position6>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="71" TopLine="59"/>
+      </Position6>
+      <Position7>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="79" TopLine="60"/>
+      </Position7>
+      <Position8>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="80" TopLine="61"/>
+      </Position8>
+      <Position9>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="81" TopLine="62"/>
+      </Position9>
+      <Position10>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="82" TopLine="63"/>
+      </Position10>
+      <Position11>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="146" TopLine="136"/>
+      </Position11>
+      <Position12>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="147" TopLine="136"/>
+      </Position12>
+      <Position13>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="234" TopLine="190"/>
+      </Position13>
+      <Position14>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="238" TopLine="197"/>
+      </Position14>
+      <Position15>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="172" TopLine="144"/>
+      </Position15>
+      <Position16>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="150" TopLine="144"/>
+      </Position16>
+      <Position17>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="173" TopLine="147"/>
+      </Position17>
+      <Position18>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="175" TopLine="147"/>
+      </Position18>
+      <Position19>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="173" TopLine="154"/>
+      </Position19>
+      <Position20>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="187" TopLine="155"/>
+      </Position20>
+      <Position21>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="243" TopLine="232"/>
+      </Position21>
+      <Position22>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="244" TopLine="232"/>
+      </Position22>
+      <Position23>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="246" TopLine="232"/>
+      </Position23>
+      <Position24>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="248" TopLine="232"/>
+      </Position24>
+      <Position25>
+        <Filename Value="GameWindow.pas"/>
+        <Caret Line="135" TopLine="109"/>
+      </Position25>
+      <Position26>
+        <Filename Value="GameWindow.pas"/>
+        <Caret Line="137" TopLine="109"/>
+      </Position26>
+      <Position27>
+        <Filename Value="GameWindow.pas"/>
+        <Caret Line="139" TopLine="109"/>
+      </Position27>
+      <Position28>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="131" TopLine="81"/>
+      </Position28>
+      <Position29>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="173" TopLine="148"/>
+      </Position29>
+      <Position30>
+        <Filename Value="GameWindow.pas"/>
+        <Caret Line="134" Column="5" TopLine="109"/>
+      </Position30>
+    </JumpHistory>
+  </ProjectSession>
+  <Debugging>
+    <BreakPoints Count="1">
+      <Item1>
+        <Kind Value="bpkAddress"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+      </Item1>
+    </BreakPoints>
+  </Debugging>
+</CONFIG>
