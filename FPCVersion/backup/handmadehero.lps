@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="10"/>
+    <BuildModes Active="Default"/>
+    <Units Count="3">
+      <Unit0>
+        <Filename Value="handmadehero.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <TopLine Value="3"/>
+        <CursorPos Y="15"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="GameSound.pas"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="63"/>
+        <CursorPos Y="145"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="GameWindow.pas"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="26"/>
+        <CursorPos X="3" Y="42"/>
+        <FoldState Value=" TCHI3 T3jQ23012c"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit2>
+    </Units>
+    <JumpHistory Count="12" HistoryIndex="11">
+      <Position1>
+        <Filename Value="handmadehero.lpr"/>
+        <Caret Line="9" Column="23"/>
+      </Position1>
+      <Position2>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="7" Column="38"/>
+      </Position2>
+      <Position3>
+        <Filename Value="handmadehero.lpr"/>
+        <Caret Line="22" Column="24" TopLine="9"/>
+      </Position3>
+      <Position4>
+        <Filename Value="GameWindow.pas"/>
+        <Caret Line="158" Column="9" TopLine="136"/>
+      </Position4>
+      <Position5>
+        <Filename Value="handmadehero.lpr"/>
+        <Caret Line="22" Column="24" TopLine="9"/>
+      </Position5>
+      <Position6>
+        <Filename Value="handmadehero.lpr"/>
+        <Caret Line="13"/>
+      </Position6>
+      <Position7>
+        <Filename Value="handmadehero.lpr"/>
+        <Caret Line="14"/>
+      </Position7>
+      <Position8>
+        <Filename Value="handmadehero.lpr"/>
+        <Caret Line="16" TopLine="7"/>
+      </Position8>
+      <Position9>
+        <Filename Value="handmadehero.lpr"/>
+        <Caret Line="13" TopLine="7"/>
+      </Position9>
+      <Position10>
+        <Filename Value="GameWindow.pas"/>
+        <Caret Line="120" TopLine="106"/>
+      </Position10>
+      <Position11>
+        <Filename Value="handmadehero.lpr"/>
+        <Caret Line="15" TopLine="3"/>
+      </Position11>
+      <Position12>
+        <Filename Value="GameWindow.pas"/>
+        <Caret Line="120" TopLine="104"/>
+      </Position12>
+    </JumpHistory>
+  </ProjectSession>
+</CONFIG>

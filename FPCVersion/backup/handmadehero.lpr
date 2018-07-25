@@ -1,6 +1,6 @@
 program handmadehero;
 
-{$mode objfpc}
+{$ mode objfpc}
 
 uses
   SysUtils,

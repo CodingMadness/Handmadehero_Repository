@@ -118,8 +118,8 @@ implementation
   function DrawWindow(const wndObj: PWNDCLASS): HWND;
   begin
     Result := CreateWindowEx(0, wndObj^.lpszClassName, wndObj^.lpszMenuName,
-                                WS_OVERLAPPEDWINDOW or WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT,
-                                CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, wndObj^.hInstance, nil);
+      WS_OVERLAPPEDWINDOW or WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT,
+      CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, wndObj^.hInstance, nil);
   end;
 
   procedure ProceedWin32Messages;
