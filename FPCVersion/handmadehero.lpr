@@ -10,7 +10,7 @@ var
   pwnd: PWNDCLASS = nil;
 
 begin
-  AllocWindow(pwnd);
+  CreateWindowObject(pwnd);
 
   if RegisterWindow(pwnd) then
   begin

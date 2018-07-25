@@ -7,8 +7,6 @@
         Windows, mmsystem, sysutils, DirectSound;
 
       TYPE
-        TDirectSound8 = IDirectSound8;
-
         TWaveCycle = record
           const WAVEFREQUENCY = 256; //1-HZ=256
           const HALFWAVEFREQUENCY = WAVEFREQUENCY div 2; //0.5 HZ = 128
@@ -57,13 +55,13 @@
 
         PSoundBuffer = ^TSoundBuffer;
 
-      procedure EnableSoundProcessing(const hwnd: HWND);
-      procedure CreateWriteableSoundBuffer(var soundBuffer: TSoundBuffer);
+      function EnableSoundProcessing(const hwnd: HWND): BOOL;
+      procedure CreateSoundBuffer(var soundBuffer: TSoundBuffer);
       procedure WriteSamplesToSoundBuffer(const soundBuffer: PSoundBuffer);
       procedure PlayTheSoundBuffer(const soundBuffer: PSoundBuffer);
 
   IMPLEMENTATION
-        var DS8: TDIRECTSOUND8;
+        var DS8: IDIRECTSOUND8;
 
         function internal_lock(const soundBuffer: PSoundBuffer): HRESULT;
           var lockingSucceed: boolean;
@@ -127,7 +125,6 @@
             result.Size := nrOfBytesToWrite;
             result.Start := LPVOID(@StartByteToLockFrom);
           end;
-
         begin
           if not soundBuffer^.Playing then
           begin
@@ -140,9 +137,7 @@
             soundBuffer^.LockableRegion.ToLock := ComputeRegionToLock;
 
           if soundBuffer^.LockableRegion.Unlocked then
-          begin
             locked := internal_lock(soundBuffer) >= 0;
-          end;
 
           result := locked;
         end;
@@ -153,7 +148,7 @@
           var volume: TSoundVolume;
           var SampleIndex: TSampleIndex;
 
-          function get_sineWaveVolume: TSoundVolume; //doesnt produce proper soundoutput!
+          function get_sineWaveVolume: TSoundVolume;
           var time, sinus: real;
           begin
             time := TWaveCycle.DURATION * Real(runningSampleIndex) / Real(TSampleInfo.SAMPLESPERWAVECYCLE);
@@ -187,15 +182,13 @@
           end;
         end;
 
-        (*WORKS*)
-        procedure EnableSoundProcessing(const hwnd: HWND);
+        function EnableSoundProcessing(const hwnd: HWND): BOOL;
         begin
-          if DirectSoundCreate8(nil, DS8, nil) < 0 then raise Exception.Create('error1');
-            if Ds8.SetCooperativeLevel(hwnd, DSSCL_PRIORITY) < 0 then Exception.Create('error2');
+          result := (DirectSoundCreate8(nil, DS8, nil) >= 0);
+          result := result and (Ds8.SetCooperativeLevel(hwnd, DSSCL_PRIORITY) >= 0);
         end;
 
-        (*WORKS*)
-        procedure CreateWriteableSoundBuffer(var soundBuffer: TSoundBuffer);
+        procedure CreateSoundBuffer(var soundBuffer: TSoundBuffer);
           var bufferCreated: boolean;
           var bfdesc : DSBUFFERDESC;
           var wFormat: WAVEFORMATEX;
@@ -206,7 +199,7 @@
           wFormat.nChannels := TSampleInfo.CHANNELCOUNT;
           wFormat.nSamplesPerSec := TSampleInfo.SAMPLESPERSECOND;
           wFormat.wBitsPerSample := 16;
-          wFormat.nBlockAlign := Word(Trunc((WFORMAT.nChannels * WFORMAT.wBitsPerSample) / 8));
+          wFormat.nBlockAlign := Word(Round((WFORMAT.nChannels * WFORMAT.wBitsPerSample) / 8));
           wFormat.nAvgBytesPerSec := WFORMAT.nBlockAlign * WFORMAT.nSamplesPerSec;
 
           bfdesc := default(DSBUFFERDESC);
@@ -219,13 +212,12 @@
           soundBuffer.Playing := false;
           soundBuffer.LockableRegion.Unlocked := true;
           soundBuffer.LockableRegion.Locked := false;
-          //throws SIGSEGV
+
           bufferCreated := DS8.CreateSoundBuffer(bfdesc, soundBuffer.Content, nil) >= 0;
 
           if not bufferCreated then raise Exception.Create('Somehow the Creation of soundBuffer didnt work properly');
         end;
 
-        (*DOESNT WORK PROPERLY AT THE SECOND CALL!*)
         procedure WriteSamplesToSoundBuffer(const soundBuffer: PSoundBuffer);
           var locked: boolean = false;
           var unlocked: boolean = false;
@@ -248,7 +240,6 @@
             raise Exception.Create('The buffers lockedRegion he locked once for writing to it couldnt be unlocked again');
         end;
 
-        (*WORKS*)
         procedure PlayTheSoundBuffer(const soundBuffer: PSoundBuffer);
         begin
           if not soundBuffer^.Playing then
