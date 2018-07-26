@@ -1,6 +1,6 @@
 program handmadehero;
 
-{$ mode objfpc}
+{$mode objfpc}
 
 uses
   SysUtils,
@@ -15,7 +15,7 @@ begin
 
   if RegisterWindow(pwnd) then
   begin
-    ONE_GAMEHWND := DrawWindow(pwnd);
+    ONE_GAMEHWND := DrawWindow(pwnd); //this line is actually okm comment out just for test
 
     if ONE_GAMEHWND = 0 then
     begin

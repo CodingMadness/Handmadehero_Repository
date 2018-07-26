@@ -13,7 +13,7 @@ interface
   type
     TMaxWidth  =  0..MIN_WIDTH;
     TMaxHeight =  0..MIN_HEIGHT;
-    TPixelArea =  0..(MIN_WIDTH * MIN_HEIGHT);
+    TWindowArea =  0..(MIN_WIDTH * MIN_HEIGHT);
 
     TWindowData = record
       Width: TMaxWidth;
@@ -155,6 +155,7 @@ implementation
     while RUNNING do
     begin
       ProceedWin32Messages;
+      WriteSamplesToSoundBuffer(@ONE_SOUNDBUFFER);
       WritePixelsToBuffer(@ONE_PIXELBUFFER, x, y);
       DrawPixelBuffer(ONE_DC, @ONE_PIXELBUFFER, @ONE_GAMEWINDOW);
       Inc(x);

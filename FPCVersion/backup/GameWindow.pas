@@ -13,7 +13,7 @@ interface
   type
     TMaxWidth  =  0..MIN_WIDTH;
     TMaxHeight =  0..MIN_HEIGHT;
-    TPixelArea =  0..(MIN_WIDTH * MIN_HEIGHT);
+    TWindowArea =  0..(MIN_WIDTH * MIN_HEIGHT);
 
     TWindowData = record
       Width: TMaxWidth;
@@ -118,8 +118,8 @@ implementation
   function DrawWindow(const wndObj: PWNDCLASS): HWND;
   begin
     Result := CreateWindowEx(0, wndObj^.lpszClassName, wndObj^.lpszMenuName,
-      WS_OVERLAPPEDWINDOW or WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT,
-      CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, wndObj^.hInstance, nil);
+                                WS_OVERLAPPEDWINDOW or WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT,
+                                CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, wndObj^.hInstance, nil);
   end;
 
   procedure ProceedWin32Messages;
@@ -155,6 +155,7 @@ implementation
     while RUNNING do
     begin
       ProceedWin32Messages;
+      WriteSamplesToSoundBuffer(@ONE_SOUNDBUFFER
       WritePixelsToBuffer(@ONE_PIXELBUFFER, x, y);
       DrawPixelBuffer(ONE_DC, @ONE_PIXELBUFFER, @ONE_GAMEWINDOW);
       Inc(x);

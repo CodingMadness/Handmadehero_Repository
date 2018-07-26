@@ -69,7 +69,7 @@ interface
 
     {PUBLIC}
     procedure CreateWindowSizedBuffer(const pixelBuffer: PPixelBuffer; const wndWidth: TMaxWidth; const wndHeight: TMaxHeight); inline;
-      var windowData: TWindowData;
+    var windowData: TWindowData;
     begin
       if pixelBuffer^.Content <> nil then
         writeLn('FREED MEMORY SUCCESSFULLY?  ' +

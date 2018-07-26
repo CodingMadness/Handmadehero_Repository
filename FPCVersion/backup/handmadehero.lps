@@ -4,83 +4,233 @@
     <PathDelim Value="\"/>
     <Version Value="10"/>
     <BuildModes Active="Default"/>
-    <Units Count="3">
+    <Units Count="12">
       <Unit0>
         <Filename Value="handmadehero.lpr"/>
         <IsPartOfProject Value="True"/>
-        <TopLine Value="3"/>
-        <CursorPos Y="15"/>
-        <UsageCount Value="20"/>
+        <TopLine Value="21"/>
+        <CursorPos X="23" Y="27"/>
+        <UsageCount Value="29"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="GameSound.pas"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="63"/>
-        <CursorPos Y="145"/>
-        <UsageCount Value="10"/>
+        <TopLine Value="117"/>
+        <CursorPos X="57" Y="162"/>
+        <FoldState Value=" TCBL46 T3iY8A214 piZk184111T"/>
+        <UsageCount Value="13"/>
         <Loaded Value="True"/>
       </Unit1>
       <Unit2>
         <Filename Value="GameWindow.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="26"/>
-        <CursorPos X="3" Y="42"/>
-        <FoldState Value=" TCHI3 T3jQ23012c"/>
-        <UsageCount Value="10"/>
+        <TopLine Value="125"/>
+        <CursorPos Y="157"/>
+        <FoldState Value=" TCHI3 T3f2w45"/>
+        <UsageCount Value="13"/>
         <Loaded Value="True"/>
       </Unit2>
+      <Unit3>
+        <Filename Value="C:\Lazarus\fpc\3.0.4\source\rtl\win\wininc\defines.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="701"/>
+        <CursorPos X="30" Y="702"/>
+        <UsageCount Value="10"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="GameGraphics.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="31"/>
+        <CursorPos Y="71"/>
+        <FoldState Value=" TCIJ8 T3a475S"/>
+        <UsageCount Value="10"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="C:\Lazarus\fpc\3.0.4\source\rtl\inc\systemh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="390"/>
+        <CursorPos X="3" Y="406"/>
+        <UsageCount Value="10"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="C:\Lazarus\fpc\3.0.4\units\x86_64-win64\DirectX\DirectSound.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="440"/>
+        <CursorPos X="14" Y="452"/>
+        <UsageCount Value="10"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="C:\Lazarus\fpc\3.0.4\source\rtl\win\wininc\func.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="74"/>
+        <CursorPos X="10" Y="86"/>
+        <UsageCount Value="10"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="C:\Lazarus\fpc\3.0.4\source\rtl\win\wininc\base.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="172"/>
+        <CursorPos X="6" Y="184"/>
+        <UsageCount Value="10"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="C:\Lazarus\fpc\3.0.4\source\packages\winunits-base\src\mmsystem.pp"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="C:\Lazarus\fpc\3.0.4\source\rtl\win64\system.pp"/>
+        <UnitName Value="System"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="C:\Lazarus\fpc\3.0.4\source\rtl\win\sysutils.pp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="7"/>
+        <UsageCount Value="10"/>
+      </Unit11>
     </Units>
-    <JumpHistory Count="12" HistoryIndex="11">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="handmadehero.lpr"/>
-        <Caret Line="9" Column="23"/>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="266" TopLine="249"/>
       </Position1>
       <Position2>
         <Filename Value="GameSound.pas"/>
-        <Caret Line="7" Column="38"/>
+        <Caret Line="249" TopLine="248"/>
       </Position2>
       <Position3>
-        <Filename Value="handmadehero.lpr"/>
-        <Caret Line="22" Column="24" TopLine="9"/>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="250" TopLine="245"/>
       </Position3>
       <Position4>
-        <Filename Value="GameWindow.pas"/>
-        <Caret Line="158" Column="9" TopLine="136"/>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="266" TopLine="248"/>
       </Position4>
       <Position5>
-        <Filename Value="handmadehero.lpr"/>
-        <Caret Line="22" Column="24" TopLine="9"/>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="249" TopLine="216"/>
       </Position5>
       <Position6>
-        <Filename Value="handmadehero.lpr"/>
-        <Caret Line="13"/>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="250" TopLine="216"/>
       </Position6>
       <Position7>
-        <Filename Value="handmadehero.lpr"/>
-        <Caret Line="14"/>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="266" TopLine="248"/>
       </Position7>
       <Position8>
-        <Filename Value="handmadehero.lpr"/>
-        <Caret Line="16" TopLine="7"/>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="250" TopLine="245"/>
       </Position8>
       <Position9>
-        <Filename Value="handmadehero.lpr"/>
-        <Caret Line="13" TopLine="7"/>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="266" TopLine="248"/>
       </Position9>
       <Position10>
-        <Filename Value="GameWindow.pas"/>
-        <Caret Line="120" TopLine="106"/>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="250" TopLine="245"/>
       </Position10>
       <Position11>
-        <Filename Value="handmadehero.lpr"/>
-        <Caret Line="15" TopLine="3"/>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="266" TopLine="248"/>
       </Position11>
       <Position12>
-        <Filename Value="GameWindow.pas"/>
-        <Caret Line="120" TopLine="104"/>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="250" TopLine="245"/>
       </Position12>
+      <Position13>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="266" TopLine="248"/>
+      </Position13>
+      <Position14>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="250" TopLine="245"/>
+      </Position14>
+      <Position15>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="266" TopLine="248"/>
+      </Position15>
+      <Position16>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="250" TopLine="245"/>
+      </Position16>
+      <Position17>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="266" TopLine="248"/>
+      </Position17>
+      <Position18>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="250" TopLine="245"/>
+      </Position18>
+      <Position19>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="266" TopLine="248"/>
+      </Position19>
+      <Position20>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="250" TopLine="245"/>
+      </Position20>
+      <Position21>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="266" TopLine="248"/>
+      </Position21>
+      <Position22>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="250" TopLine="245"/>
+      </Position22>
+      <Position23>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="266" TopLine="248"/>
+      </Position23>
+      <Position24>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="250" TopLine="245"/>
+      </Position24>
+      <Position25>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="266" TopLine="249"/>
+      </Position25>
+      <Position26>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="243" TopLine="74"/>
+      </Position26>
+      <Position27>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="251" Column="32" TopLine="207"/>
+      </Position27>
+      <Position28>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="163" Column="3" TopLine="119"/>
+      </Position28>
+      <Position29>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="248" Column="36" TopLine="244"/>
+      </Position29>
+      <Position30>
+        <Filename Value="GameSound.pas"/>
+        <Caret Line="162" TopLine="105"/>
+      </Position30>
     </JumpHistory>
   </ProjectSession>
+  <Debugging>
+    <BreakPoints Count="1">
+      <Item1>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Expression Value="soundBuffer^.LockableRegion.ToLock.Size = 0"/>
+        <Source Value="GameSound.pas"/>
+        <Line Value="162"/>
+      </Item1>
+    </BreakPoints>
+    <Watches Count="2">
+      <Item1>
+        <Expression Value="Pointer(messageBuffer)"/>
+      </Item1>
+    </Watches>
+  </Debugging>
 </CONFIG>
