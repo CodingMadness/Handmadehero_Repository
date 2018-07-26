@@ -6,7 +6,10 @@
       USES
         Windows, mmsystem, sysutils, DirectSound;
 
-      const SENSEFUL_ERROR_LENGTH = 38;
+      const
+        SENSEFUL_ERROR_LENGTH = 38;
+        INVALID_CURSOR_POS = -1;
+
 
       TYPE
         TWaveCycle = record
@@ -16,12 +19,11 @@
         end;
 
         TSampleInfo = record
-          const SAMPLESPERSECOND = 48000;  //48khz
-          const SAMPLESPERWAVECYCLE = SAMPLESPERSECOND div TWaveCycle.WAVEFREQUENCY;
           const SIZE = 4;
-
           const CHANNELCOUNT = 2;
-          const CHANNELVOLUME = 9000(*Int16.MaxValue div 2*);
+          const CHANNELVOLUME = 10000;
+          const SAMPLESPERSECOND = 48000;
+          const SAMPLESPERWAVECYCLE = SAMPLESPERSECOND div TWaveCycle.WAVEFREQUENCY;
         end;
 
         TSoundVolume = -TSampleInfo.CHANNELVOLUME..TSampleInfo.CHANNELVOLUME;
@@ -35,6 +37,8 @@
         TSampleIndex = 0..(TSampleInfo.SAMPLESPERSECOND-1);
 
         TBufferSize  =  0..(TSampleInfo.SAMPLESPERSECOND * TSampleInfo.SIZE);
+
+        TValidCursorPos = INVALID_CURSOR_POS..high(DWORD);
 
         TERRMSG = String[SENSEFUL_ERROR_LENGTH];
 
@@ -53,7 +57,7 @@
          ToLock: TRegion;
          LockedRegions: array[0..1] of TRegion;
          State: TRegionState;
-         SystemPlayCursor: DWORD;
+         SystemPlayCursor: TValidCursorPos;
         end;
 
         TSoundBuffer = record
@@ -76,8 +80,6 @@
 
         {PRIVATE}
         function CodeToErrorMsg(const errorCode: HRESULT): TERRMSG;
-        const
-          CHARS_TO_REMOVE = 10;
         var
           messageBuffer: LPSTR;
         begin
@@ -119,7 +121,6 @@
         function LockRegion(const soundBuffer: PSoundBuffer): TRegionState;
           var firstByte: Byte = 0;
           var wholeBuffer: TRegion;
-          var locked: boolean = false;
 
           function ComputeRegionToLock: TRegion;
             var positionValid: boolean;
@@ -229,12 +230,15 @@
           bfdesc.dwSize := sizeOf(DSBUFFERDESC);
           bfdesc.dwBufferBytes := high(TBufferSize);
           bfdesc.dwFlags := 0;
-          bfdesc.lpwfxFormat:= @WFORMAT;
+          bfdesc.lpwfxFormat:= @wFormat;
 
           soundBuffer := default(TSoundBuffer);
           soundBuffer.Playing := false;
-          soundBuffer.LockableRegion.State.Locked := false;
-          soundBuffer.LockableRegion.State.CallCnt := 0;
+          soundBuffer.RunningSampleIndex := 0;
+          soundBuffer.LockableRegion.SystemPlayCursor := INVALID_CURSOR_POS;
+          soundBuffer.LockableRegion.State.Locked   := false;
+          soundBuffer.LockableRegion.State.CallCnt  := 0;
+          soundBuffer.LockableRegion.State.ErrorMsg := 'NONE';
 
           bufferCreated := DS8.CreateSoundBuffer(bfdesc, soundBuffer.Content, nil) >= 0;
 
