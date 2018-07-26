@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Lazarus>
+    <ColorSchemes Version="11">
+      <Names Count="1">
+        <Item1 Value="DelphiStyleExtended"/>
+      </Names>
+      <Globals Version="11">
+        <SchemeDelphiStyleExtended>
+          <ahaGutter Background="clBtnFace"/>
+          <ahaErrorLine Background="clRed" Foreground="clWhite" BackPriority="500" ForePriority="500" FramePriority="500"/>
+          <ahaMouseLink Foreground="clBlue" FrameColor="clBlue" FrameEdges="sfeBottom" BackPriority="2500" ForePriority="1500" FramePriority="7500"/>
+          <ahaTextBlock Background="10841427" Foreground="clWhite" BackPriority="7000" ForePriority="7000" FramePriority="7000"/>
+          <ahaWordGroup FrameColor="clRed" BackPriority="3000" ForePriority="3000" FramePriority="3000"/>
+          <ahaFoldedCode Foreground="13408665" FrameColor="13408665" BackPriority="8000" ForePriority="8000" FramePriority="8000"/>
+          <ahaLineNumber Background="16053492" Foreground="13408665"/>
+          <ahaRightMargin Foreground="clSilver"/>
+          <ahaTopInfoHint Background="clSkyBlue" Foreground="clBlack" FrameColor="clMaroon" FrameStyle="slsDashed" FrameEdges="sfeBottom" BackPriority="8500" ForePriority="8500" FramePriority="8500"/>
+          <ahaBracketMatch Background="clAqua" FrameColor="13421782" BackPriority="3000" ForePriority="3000" FramePriority="3000"/>
+          <ahaHighlightAll Background="clYellow" BackPriority="4000" ForePriority="4000" FramePriority="4000"/>
+          <ahaModifiedLine Background="16053492" Foreground="clLime" FrameColor="clYellow"/>
+          <ahaHighlightWord FrameColor="13421782" BackPriority="3000" ForePriority="3000" FramePriority="3000"/>
+          <ahaLineHighlight Background="15138810" BackPriority="500" ForePriority="500" FramePriority="500"/>
+          <ahaSyncroEditCur FrameColor="clFuchsia" BackPriority="6000" ForePriority="6000" FramePriority="6000"/>
+          <ahaExecutionPoint Background="10066380" Foreground="clBlack" BackPriority="500" ForePriority="500" FramePriority="500"/>
+          <ahaSyncroEditArea Background="16449510" BackPriority="2000" ForePriority="2000" FramePriority="2000"/>
+          <ahaSyncroEditSync FrameColor="clRed" BackPriority="6000" ForePriority="6000" FramePriority="6000"/>
+          <ahaCodeFoldingTree Background="16053492" Foreground="13408665"/>
+          <ahaGutterSeparator Background="clWhite" Foreground="clGray"/>
+          <ahaIfDefNodeActive BackPriority="9050" ForePriority="9050" FramePriority="9050"/>
+          <ahaSyncroEditOther FrameColor="clBlue" BackPriority="6000" ForePriority="6000" FramePriority="6000"/>
+          <ahaTemplateEditCur FrameColor="clAqua" BackPriority="6000" ForePriority="6000" FramePriority="6000"/>
+          <ahaIfDefBlockActive BackPriority="9000" ForePriority="9000" FramePriority="9000"/>
+          <ahaTemplateEditSync FrameColor="clFuchsia" BackPriority="6000" ForePriority="6000" FramePriority="6000"/>
+          <ahaEnabledBreakpoint Background="16762823" Foreground="clBlack" BackPriority="500" ForePriority="500" FramePriority="500"/>
+          <ahaIfDefNodeInactive BackPriority="9150" ForePriority="9150" FramePriority="9150"/>
+          <ahaIncrementalSearch Background="clBlack" Foreground="16580045" BackPriority="4000" ForePriority="4000" FramePriority="4000"/>
+          <ahaInvalidBreakpoint Background="clGreen" Foreground="clWhite" BackPriority="500" ForePriority="500" FramePriority="500"/>
+          <ahaTemplateEditOther FrameColor="clMaroon" BackPriority="6000" ForePriority="6000" FramePriority="6000"/>
+          <ahaUnknownBreakpoint Background="16762823" Foreground="clBlack" BackPriority="500" ForePriority="500" FramePriority="500"/>
+          <ahaDisabledBreakpoint Background="16762823" Foreground="clGray" BackPriority="500" ForePriority="500" FramePriority="500"/>
+          <ahaIfDefBlockInactive Foreground="clSilver" BackPriority="9050" ForePriority="9050" FramePriority="9050" ForeAlpha="165"/>
+          <ahaIfDefNodeTmpActive BackPriority="9050" ForePriority="9050" FramePriority="9050"/>
+          <ahaOutlineLevel1Color Foreground="clRed"/>
+          <ahaOutlineLevel2Color Foreground="39159"/>
+          <ahaOutlineLevel3Color Foreground="2280512"/>
+          <ahaOutlineLevel4Color Foreground="13421568"/>
+          <ahaOutlineLevel5Color Foreground="16738346"/>
+          <ahaOutlineLevel6Color Foreground="13566148"/>
+          <ahaIfDefBlockTmpActive BackPriority="9000" ForePriority="9000" FramePriority="9000"/>
+          <ahaSpecialVisibleChars BackPriority="8100" ForePriority="8100" FramePriority="8100"/>
+        </SchemeDelphiStyleExtended>
+      </Globals>
+      <LangObjectPascal Version="11">
+        <SchemeDelphiStyleExtended>
+          <ahaIfDefBlockInactive ForeAlpha="0"/>
+          <Number Foreground="clBlue"/>
+          <String Foreground="clBlue"/>
+          <Symbol Foreground="clRed"/>
+          <Comment Foreground="clGreen" Style="fsItalic"/>
+          <Assembler Foreground="clBlack"/>
+          <Directive Foreground="1513471"/>
+          <Case_label Foreground="clLime"/>
+          <Identifier Foreground="clBlack"/>
+          <IDE_Directive Foreground="1710847" ForeAlpha="255"/>
+          <Reserved_word Foreground="clNavy" Style="fsBold"/>
+        </SchemeDelphiStyleExtended>
+      </LangObjectPascal>
+      <LangLazarus_Form_definition Version="11">
+        <SchemeDelphiStyleExtended>
+          <Key Style="fsBold"/>
+          <Number Foreground="clBlue"/>
+          <String Foreground="clBlue"/>
+          <Comment Foreground="clGreen" Style="fsItalic"/>
+          <ahaIfDefBlockInactive ForeAlpha="0"/>
+        </SchemeDelphiStyleExtended>
+      </LangLazarus_Form_definition>
+      <LangXML_document Version="11">
+        <SchemeDelphiStyleExtended>
+          <Text Foreground="clBlack" Style="fsBold"/>
+          <Comment Foreground="clGreen" Style="fsItalic"/>
+          <Element_Name Foreground="clMaroon" Style="fsBold"/>
+          <CDATA_Section Foreground="clOlive" Style="fsItalic"/>
+          <Attribute_Name Foreground="clMaroon"/>
+          <Attribute_Value Foreground="clNavy" Style="fsBold"/>
+          <DOCTYPE_Section Foreground="clBlue" Style="fsItalic"/>
+          <Entity_Reference Foreground="clBlue" Style="fsBold"/>
+          <ahaIfDefBlockInactive ForeAlpha="0"/>
+          <Processing_Instruction Foreground="clBlue"/>
+          <Namespace_Attribute_Name Foreground="clRed"/>
+          <Namespace_Attribute_Value Foreground="clRed" Style="fsBold"/>
+        </SchemeDelphiStyleExtended>
+      </LangXML_document>
+      <LangHTML_document Version="11">
+        <SchemeDelphiStyleExtended>
+          <Asp Background="clYellow" Foreground="clBlack"/>
+          <Value Foreground="16744448"/>
+          <Comment Foreground="clGreen" Style="fsItalic"/>
+          <Identifier Style="fsBold"/>
+          <Unknown_word Foreground="clRed" Style="fsBold"/>
+          <Reserved_word Foreground="clNavy" Style="fsBold"/>
+          <Escape_ampersand Foreground="clLime" Style="fsBold"/>
+          <ahaIfDefBlockInactive ForeAlpha="0"/>
+        </SchemeDelphiStyleExtended>
+      </LangHTML_document>
+      <LangC__ Version="11">
+        <SchemeDelphiStyleExtended>
+          <Space Foreground="clWindow"/>
+          <Number Foreground="clBlue"/>
+          <String Foreground="clBlue"/>
+          <Comment Foreground="clGreen" Style="fsItalic"/>
+          <Assembler Foreground="clBlack"/>
+          <Preprocessor Foreground="clGreen" Style="fsItalic"/>
+          <Reserved_word Foreground="clNavy" Style="fsBold"/>
+          <ahaIfDefBlockInactive ForeAlpha="0"/>
+        </SchemeDelphiStyleExtended>
+      </LangC__>
+      <LangPerl Version="11">
+        <SchemeDelphiStyleExtended>
+          <Space Foreground="clWindow"/>
+          <Number Foreground="clBlue"/>
+          <Pragma Style="fsBold"/>
+          <String Foreground="clBlue"/>
+          <Comment Foreground="clGreen" Style="fsItalic"/>
+          <Variable Style="fsBold"/>
+          <Reserved_word Foreground="clNavy" Style="fsBold"/>
+          <ahaIfDefBlockInactive ForeAlpha="0"/>
+        </SchemeDelphiStyleExtended>
+      </LangPerl>
+      <LangJava Version="11">
+        <SchemeDelphiStyleExtended>
+          <Space Foreground="clWindow"/>
+          <Number Foreground="clBlue"/>
+          <String Foreground="clBlue"/>
+          <Comment Foreground="clGreen" Style="fsItalic"/>
+          <Documentation Foreground="clGreen" Style="fsItalic"/>
+          <Reserved_word Foreground="clNavy" Style="fsBold"/>
+          <ahaIfDefBlockInactive ForeAlpha="0"/>
+        </SchemeDelphiStyleExtended>
+      </LangJava>
+      <LangUNIX_Shell_Script Version="11">
+        <SchemeDelphiStyleExtended>
+          <Number Foreground="clBlue"/>
+          <String Foreground="clBlue"/>
+          <Comment Foreground="clGreen" Style="fsItalic"/>
+          <Variable Foreground="clPurple"/>
+          <Reserved_word Foreground="clNavy" Style="fsBold"/>
+          <ahaIfDefBlockInactive ForeAlpha="0"/>
+        </SchemeDelphiStyleExtended>
+      </LangUNIX_Shell_Script>
+      <LangPython Version="11">
+        <SchemeDelphiStyleExtended>
+          <Float Foreground="clBlue"/>
+          <Octal Foreground="clBlue"/>
+          <Number Foreground="clBlue"/>
+          <String Foreground="clBlue"/>
+          <Comment Foreground="clGreen" Style="fsItalic"/>
+          <Hexadecimal Foreground="clBlue"/>
+          <SyntaxError Foreground="clRed"/>
+          <Documentation Foreground="clGreen" Style="fsItalic"/>
+          <Reserved_word Foreground="clNavy" Style="fsBold"/>
+          <Non_reserved_keyword Foreground="clNavy" Style="fsBold"/>
+          <ahaIfDefBlockInactive ForeAlpha="0"/>
+          <System_functions_and_variables Style="fsBold"/>
+        </SchemeDelphiStyleExtended>
+      </LangPython>
+      <LangPHP Version="11">
+        <SchemeDelphiStyleExtended>
+          <Number Foreground="clBlue"/>
+          <String Foreground="clBlue"/>
+          <Comment Foreground="clGreen" Style="fsItalic"/>
+          <Reserved_word Foreground="clNavy" Style="fsBold"/>
+          <ahaIfDefBlockInactive ForeAlpha="0"/>
+        </SchemeDelphiStyleExtended>
+      </LangPHP>
+      <LangSQL Version="11">
+        <SchemeDelphiStyleExtended>
+          <Number Foreground="clBlue"/>
+          <String Foreground="clBlue"/>
+          <Comment Foreground="clGreen" Style="fsItalic"/>
+          <Function Style="fsBold"/>
+          <Data_type Style="fsBold"/>
+          <Exception Style="fsItalic"/>
+          <Reserved_word Foreground="clNavy" Style="fsBold"/>
+          <Default_packages Style="fsBold"/>
+          <SQL_Plus_command Style="fsBold"/>
+          <ahaIfDefBlockInactive ForeAlpha="0"/>
+          <Reserved_word__PL_SQL_ Style="fsBold"/>
+        </SchemeDelphiStyleExtended>
+      </LangSQL>
+      <LangJavascript Version="11">
+        <SchemeDelphiStyleExtended>
+          <Number Foreground="clBlue"/>
+          <String Foreground="clBlue"/>
+          <Comment Foreground="clGreen" Style="fsItalic"/>
+          <Reserved_word Foreground="clNavy" Style="fsBold"/>
+          <ahaIfDefBlockInactive ForeAlpha="0"/>
+        </SchemeDelphiStyleExtended>
+      </LangJavascript>
+      <LangDiff_File Version="11">
+        <SchemeDelphiStyleExtended>
+          <Unknown_word Style="fsItalic"/>
+          <Diff_New_File Background="clGreen" Style="fsBold"/>
+          <Diff_Added_line Foreground="clGreen"/>
+          <Diff_Changed_Line Foreground="clPurple"/>
+          <Diff_Chunk_Marker Style="fsBold"/>
+          <Diff_Removed_Line Foreground="clRed"/>
+          <Diff_Original_File Background="clRed" Style="fsBold"/>
+          <ahaIfDefBlockInactive ForeAlpha="0"/>
+          <Diff_Chunk_Line_Counts Foreground="clPurple" Style="fsBold"/>
+          <Diff_Chunk_New_Line_Count Foreground="clGreen" Style="fsBold"/>
+          <Diff_Chunk_Original_Line_Count Foreground="clRed" Style="fsBold"/>
+        </SchemeDelphiStyleExtended>
+      </LangDiff_File>
+      <LangMS_DOS_batch_language Version="11">
+        <SchemeDelphiStyleExtended>
+          <Key Style="fsBold"/>
+          <Number Foreground="clBlue"/>
+          <Comment Foreground="clNavy" Style="fsItalic"/>
+          <Variable Foreground="clGreen"/>
+          <ahaIfDefBlockInactive ForeAlpha="0"/>
+        </SchemeDelphiStyleExtended>
+      </LangMS_DOS_batch_language>
+      <LangINI_file Version="11">
+        <SchemeDelphiStyleExtended>
+          <Comment Foreground="clGreen" Style="fsItalic"/>
+          <Section Style="fsBold"/>
+          <ahaIfDefBlockInactive ForeAlpha="0"/>
+        </SchemeDelphiStyleExtended>
+      </LangINI_file>
+      <Langpo_language_files Version="11">
+        <SchemeDelphiStyleExtended>
+          <Key Style="fsBold"/>
+          <Flags Foreground="clTeal"/>
+          <String Foreground="clFuchsia"/>
+          <Comment Foreground="clGreen" Style="fsItalic"/>
+          <Identifier Foreground="clGreen" Style="fsBold"/>
+          <Previous_value Foreground="clOlive" Style="fsItalic"/>
+          <ahaIfDefBlockInactive ForeAlpha="0"/>
+        </SchemeDelphiStyleExtended>
+      </Langpo_language_files>
+      <LangPike Version="11">
+        <SchemeDelphiStyleExtended>
+          <ahaIfDefBlockInactive ForeAlpha="0"/>
+        </SchemeDelphiStyleExtended>
+      </LangPike>
+    </ColorSchemes>
+  </Lazarus>
+</CONFIG>

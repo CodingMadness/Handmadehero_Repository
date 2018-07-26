@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Compiler Value="C:\Lazarus\fpc\3.0.4\bin\x86_64-win64\fpc.exe" Date="1286836893"/>
+  <Params Value=" -Twin64 -Pi386 -MObjFPC -Scghi -O4 -gw2 -gl -l -vewnhilbq -FiC:\Users\shho3\Desktop\Handmadehero_Repository\FPCVersion\lib\i386-win64 -FuC:\Lazarus\fpc\3.0.4\units\i386-win64\DirectX -FuC:\Users\shho3\Desktop\Handmadehero_Repository\FPCVersion\ -FUC:\Users\shho3\Desktop\Handmadehero_Repository\FPCVersion\lib\i386-win64\ handmadehero.lpr"/>
+  <Complete Value="False"/>
+</CONFIG>
