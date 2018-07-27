@@ -9,25 +9,24 @@
         <Filename Value="handmadehero.lpr"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="1"/>
-        <CursorPos X="43" Y="17"/>
         <UsageCount Value="36"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="GameSound.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="13"/>
-        <CursorPos X="65" Y="29"/>
-        <FoldState Value=" TCKM65 T3ib684 pjBj16c321_"/>
+        <TopLine Value="220"/>
+        <CursorPos X="46" Y="12"/>
+        <FoldState Value=" TCDL56 T3ib684 pjBj16c321w"/>
         <UsageCount Value="18"/>
         <Loaded Value="True"/>
       </Unit1>
       <Unit2>
         <Filename Value="GameWindow.pas"/>
-        <TopLine Value="46"/>
-        <CursorPos X="60" Y="53"/>
-        <FoldState Value=" TCHM3 T3jA69]80iKC3]8L Hj5E1h"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="37"/>
+        <CursorPos Y="42"/>
+        <FoldState Value=" TCHM3 T3f6r4 T0i5CC]8L Hj5E1c"/>
         <UsageCount Value="18"/>
         <Loaded Value="True"/>
       </Unit2>
