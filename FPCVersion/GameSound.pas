@@ -8,7 +8,7 @@
 
       const
         SENSEFUL_ERROR_LENGTH = 38;
-        INVALID_CURSOR_POS = -1;
+        DEFAULT_CURSOR_POS = -1;
 
       TYPE
         TWaveCycle = record
@@ -38,7 +38,7 @@
 
         TBufferSize  =  0..(TSampleInfo.SAMPLESPERSECOND * TSampleInfo.SIZE);
 
-        TValidCursorPos = INVALID_CURSOR_POS..high(DWORD);
+        TValidCursorPos = DEFAULT_CURSOR_POS..high(DWORD);
 
         TERRMSG = String[SENSEFUL_ERROR_LENGTH];
 
@@ -88,22 +88,7 @@
         result := TERRMSG(messageBuffer);
       end;
 
-      procedure internal_lock(const soundBuffer: PSoundBuffer);
-        var result: HRESULT;
-      begin
-        result := soundBuffer^.Content.Lock
-        (
-          (LPDWORD(soundBuffer^.LockableRegion.ToLock.Start))^, soundBuffer^.LockableRegion.ToLock.Size,
-          @soundBuffer^.LockableRegion.LockedRegions[0].Start, @soundBuffer^.LockableRegion.LockedRegions[0].Size,
-          @soundBuffer^.LockableRegion.LockedRegions[1].Start, @soundBuffer^.LockableRegion.LockedRegions[1].Size,
-          0
-        );
-
-        soundBuffer^.LockableRegion.State.Locked := (result >= 0);
-        soundBuffer^.LockableRegion.State.ErrorMsg := CodeToErrorMsg(result);
-      end;
-
-      procedure internal_unlock(const soundBuffer: PSoundBuffer);
+      procedure UnlockRegion(const soundBuffer: PSoundBuffer);
         var
           result: HRESULT;
       begin
@@ -117,7 +102,7 @@
         soundBuffer^.LockableRegion.State.ErrorMsg := CodeToErrorMsg(result);
       end;
 
-      function LockRegion(const soundBuffer: PSoundBuffer): TRegionState;
+      procedure LockRegion(const soundBuffer: PSoundBuffer);
         var
           firstByte: Byte = 0;
       	  wholeBuffer: TRegion;
@@ -149,6 +134,21 @@
           result.Size := nrOfBytesToWrite;
           result.Start := LPVOID(@StartByteToLockFrom);
         end;
+
+        procedure internal_lock;
+          var result: HRESULT;
+        begin
+          result := soundBuffer^.Content.Lock
+          (
+            (LPDWORD(soundBuffer^.LockableRegion.ToLock.Start))^, soundBuffer^.LockableRegion.ToLock.Size,
+            @soundBuffer^.LockableRegion.LockedRegions[0].Start, @soundBuffer^.LockableRegion.LockedRegions[0].Size,
+            @soundBuffer^.LockableRegion.LockedRegions[1].Start, @soundBuffer^.LockableRegion.LockedRegions[1].Size,
+            0
+          );
+
+          soundBuffer^.LockableRegion.State.Locked := (result >= 0);
+          soundBuffer^.LockableRegion.State.ErrorMsg := CodeToErrorMsg(result);
+        end;
       begin
         if not soundBuffer^.Playing then
         begin
@@ -160,9 +160,7 @@
         else
           soundBuffer^.LockableRegion.ToLock := get_region_toLock;
 
-        internal_lock(soundBuffer);
-
-        result := soundBuffer^.LockableRegion.State;
+        internal_lock;
       end;
 
       procedure WriteSamplesTolockedRegion(const lockedRegion: TRegion; var runningSampleIndex: TSampleIndex);
@@ -206,6 +204,8 @@
       end;
       {PRIVATE}
 
+
+      {PUBLIC}
       function EnableSoundProcessing(const hwnd: HWND): BOOL;
       begin
         result := (DirectSoundCreate8(nil, DS8, nil) >= 0);
@@ -235,7 +235,7 @@
         soundBuffer := default(TSoundBuffer);
         soundBuffer.Playing := false;
         soundBuffer.RunningSampleIndex := 0;
-        soundBuffer.LockableRegion.SystemPlayCursor := INVALID_CURSOR_POS;
+        soundBuffer.LockableRegion.SystemPlayCursor := DEFAULT_CURSOR_POS;
         soundBuffer.LockableRegion.State.Locked   := false;
         soundBuffer.LockableRegion.State.ErrorMsg := 'NONE';
 
@@ -245,13 +245,11 @@
       end;
 
       procedure WriteSamplesToSoundBuffer(const soundBuffer: PSoundBuffer);
-        var
-          regionState: TRegionState;
       begin
-        regionState := LockRegion(soundBuffer);
+        LockRegion(soundBuffer);
 
-        if not regionState.Locked then
-          raise Exception.Create(regionState.ErrorMsg);
+        if not soundBuffer^.LockableRegion.State.Locked then
+          raise Exception.Create('The specified region could not be locked because of: ' + soundBuffer^.LockableRegion.State.ErrorMsg);
 
         (*LockedRegion1*)
         WriteSamplesTolockedRegion(soundBuffer^.LockableRegion.LockedRegions[0], soundBuffer^.RunningSampleIndex);
@@ -259,10 +257,10 @@
         (*LockedRegion2*)
         WriteSamplesTolockedRegion(soundBuffer^.LockableRegion.LockedRegions[1], soundBuffer^.RunningSampleIndex);
 
-        internal_unlock(soundBuffer);
+        UnlockRegion(soundBuffer);
 
         if soundBuffer^.LockableRegion.State.Locked then
-          raise Exception.Create(regionState.ErrorMsg);
+          raise Exception.Create('The specified region could not be unlocked because of: ' + soundBuffer^.LockableRegion.State.ErrorMsg);
       end;
 
       procedure PlayTheSoundBuffer(const soundBuffer: PSoundBuffer);
@@ -270,4 +268,5 @@
         if not soundBuffer^.Playing then
           soundBuffer^.Playing := soundBuffer^.Content.Play(0, 0, DSBPLAY_LOOPING) >= 0;
       end;
+      {PUBLIC}
   end.
