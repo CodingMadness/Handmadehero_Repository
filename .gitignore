@@ -1,0 +1,9 @@
+$ git status
+    [...]
+    # Untracked files:
+    [...]
+    #       lib/
+   #        handmadehero.exe
+   #        handmadehero.lpi
+   #        handmadehero.lps
+   #        handmadehero.res
