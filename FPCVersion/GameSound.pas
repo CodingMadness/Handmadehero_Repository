@@ -125,11 +125,15 @@
 
           playCursor := soundBuffer^.LockableRegion.SystemPlayCursor;
 
-          if StartByteToLockFrom < playCursor then
-            nrOfBytesToWrite := (playCursor - StartByteToLockFrom)
+          {$region Buffer allocation bug here}
+          begin
+            if StartByteToLockFrom < playCursor then
+              nrOfBytesToWrite := (playCursor - StartByteToLockFrom)
 
-          else
-            nrOfBytesToWrite := (high(TBufferSIZE) - StartByteToLockFrom) + playCursor;
+            else
+              nrOfBytesToWrite := (high(TBufferSIZE) - StartByteToLockFrom) + playCursor;
+          end;
+          {$endregion}
 
           result.Size := nrOfBytesToWrite;
           result.Start := LPVOID(@StartByteToLockFrom);
