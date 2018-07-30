@@ -34,13 +34,13 @@
 
         PSampleChannels = ^TSampleChannels;
 
-        TSampleIndex = 0..(TSampleInfo.SAMPLESPERSECOND-1);
+        TSampleIndex =  0..(TSampleInfo.SAMPLESPERSECOND-1);
 
         TBufferSize  =  0..(TSampleInfo.SAMPLESPERSECOND * TSampleInfo.SIZE);
 
         TValidCursorPos = DEFAULT_CURSOR_POS..high(DWORD);
 
-        TERRMSG = String[SENSEFUL_ERROR_LENGTH];
+        T_ERRORMSG = String[SENSEFUL_ERROR_LENGTH];
 
         TRegion = packed record
          Start: LPVOID;
@@ -49,20 +49,22 @@
 
         TRegionState = record
           Locked: BOOL;
-          ErrorMsg: TERRMSG;
+          ErrorMsg: T_ERRORMSG;
         end;
 
         TLockableRegion = record
          ToLock: TRegion;
          LockedRegions: array[0..1] of TRegion;
          State: TRegionState;
-         SystemPlayCursor: TValidCursorPos;
+         SystemPlayCursor, SystemWriteCursor: TValidCursorPos;
         end;
+
+        WIN32SOUNDBUFFER = IDirectSoundBuffer;
 
         TSoundBuffer = record
           RunningSampleIndex: TSampleIndex;
           Playing: BOOL;
-          Content: IDirectSoundBuffer;
+          Content: WIN32SOUNDBUFFER;
           LockableRegion: TLockableRegion;
         end;
 
@@ -78,14 +80,14 @@
         DS8: IDIRECTSOUND8;
 
       {PRIVATE}
-      function CodeToErrorMsg(const errorCode: HRESULT): TERRMSG;
+      function CodeToErrorMsg(const errorCode: HRESULT): T_ERRORMSG;
       var
         messageBuffer: LPSTR;
       begin
         FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER or FORMAT_MESSAGE_FROM_SYSTEM or FORMAT_MESSAGE_IGNORE_INSERTS,
                        nil, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), LPSTR(@messageBuffer), 0, nil);
 
-        result := TERRMSG(messageBuffer);
+        result := T_ERRORMSG(messageBuffer);
       end;
 
       procedure UnlockRegion(const soundBuffer: PSoundBuffer);
@@ -103,16 +105,17 @@
       end;
 
       procedure LockRegion(const soundBuffer: PSoundBuffer);
-        var
-          firstByte: Byte = 0;
-      	  wholeBuffer: TRegion;
-
-        function get_region_toLock: TRegion;
-          var positionValid: boolean;
-          var StartByteToLockFrom, playCursor: DWORD;
-          var nrOfBytesToWrite: TBufferSize = 0;
+        function compute_region_toLock: TRegion;
+          var
+            positionValid: boolean;
+            StartByteToLockFrom, playCursor, writeCursor: TBufferSize;
+            nrOfBytesToWrite: TBufferSize = 0;
         begin
-          positionValid := soundBuffer^.Content.GetCurrentPosition(@soundBuffer^.LockableRegion.SystemPlayCursor, nil) >= 0;
+          positionValid := soundBuffer^.Content.
+                                        GetCurrentPosition
+                                        (@soundBuffer^.LockableRegion.SystemPlayCursor,
+                                         @soundBuffer^.LockableRegion.SystemWriteCursor
+                                        ) >= 0;
 
           if not positionValid then
           begin
@@ -124,22 +127,33 @@
           StartByteToLockFrom := (soundBuffer^.RunningSampleIndex * TSampleInfo.SIZE) mod high(TBufferSize);
 
           playCursor := soundBuffer^.LockableRegion.SystemPlayCursor;
-
+          writeCursor := soundBuffer^.LockableRegion.SystemWriteCursor;
           {$region Buffer allocation bug here}
-          begin
-            if StartByteToLockFrom < playCursor then
-              nrOfBytesToWrite := (playCursor - StartByteToLockFrom)
 
-            else
-              nrOfBytesToWrite := (high(TBufferSIZE) - StartByteToLockFrom) + playCursor;
-          end;
+          if StartByteToLockFrom < playCursor then
+            nrOfBytesToWrite := (playCursor - StartByteToLockFrom)
+
+          else if StartByteToLockFrom > playCursor then
+            nrOfBytesToWrite := (high(TBufferSIZE) - StartByteToLockFrom) + playCursor
+
+          else if StartByteToLockFrom = playCursor then
+            nrOfBytesToWrite := (high(TBufferSIZE) - playCursor);
+
           {$endregion}
 
           result.Size := nrOfBytesToWrite;
           result.Start := LPVOID(@StartByteToLockFrom);
         end;
 
-        procedure internal_lock;
+        function get_whole_buffer: TRegion; inline;
+        var
+          firstByte: Byte = 0;
+        begin
+          result.Start := @firstByte;
+          result.Size := high(TBufferSIZE);
+        end;
+
+        procedure internal_lock; inline;
           var result: HRESULT;
         begin
           result := soundBuffer^.Content.Lock
@@ -155,25 +169,22 @@
         end;
       begin
         if not soundBuffer^.Playing then
-        begin
-          wholeBuffer.Start := @firstByte;
-          wholeBuffer.Size := high(TBufferSIZE);
-          soundBuffer^.LockableRegion.ToLock := wholeBuffer;
-        end
+          soundBuffer^.LockableRegion.ToLock := get_whole_buffer
 
         else
-          soundBuffer^.LockableRegion.ToLock := get_region_toLock;
+          soundBuffer^.LockableRegion.ToLock := compute_region_toLock;
 
         internal_lock;
       end;
 
       procedure WriteSamplesTolockedRegion(const lockedRegion: TRegion; var runningSampleIndex: TSampleIndex);
-        var totalSampleCount: TSampleIndex = 0;
-        var firstSample: PSampleChannels;
-        var volume: TSoundVolume;
-        var SampleIndex: TSampleIndex;
+        var
+         totalSampleCount: TSampleIndex = 0;
+         firstSample: PSampleChannels;
+         volume: TSoundVolume;
+         SampleIndex: TSampleIndex;
 
-        function get_sineWaveVolume: TSoundVolume;
+        function get_sine_volume: TSoundVolume; inline;
         var time, sinus: real;
         begin
           time := TWaveCycle.DURATION * Real(runningSampleIndex) / Real(TSampleInfo.SAMPLESPERWAVECYCLE);
@@ -181,7 +192,7 @@
           result := TSoundVolume(Trunc(sinus * TSampleInfo.CHANNELVOLUME));
         end;
 
-        function get_squareWaveVolume: TSoundVolume;
+        function get_square_volume: TSoundVolume; inline;
           var relativeSampleIndex: TSampleIndex;
         begin
           relativeSampleIndex := (runningSampleIndex div TWaveCycle.HALFWAVEFREQUENCY);
@@ -199,7 +210,7 @@
 
         for SampleIndex := 0 to totalSampleCount do
         begin
-          volume := get_sineWaveVolume;
+          volume := get_sine_volume;
           firstSample^.Left := volume;
           firstSample^.Right := volume;
           inc(firstSample);
