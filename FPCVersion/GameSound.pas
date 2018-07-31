@@ -38,34 +38,40 @@
 
         TBufferSize  =  0..(TSampleInfo.SAMPLESPERSECOND * TSampleInfo.SIZE);
 
-        TValidCursorPos = DEFAULT_CURSOR_POS..high(DWORD);
+        TCursorPosition = DEFAULT_CURSOR_POS..high(DWORD);
 
         T_ERRORMSG = String[SENSEFUL_ERROR_LENGTH];
 
         TRegion = packed record
-         Start: LPVOID;
+         Start: DWORD;
          Size: TBufferSize;
        end;
 
         TRegionState = record
           Locked: BOOL;
           ErrorMsg: T_ERRORMSG;
+          HowOftenCalled: integer;
+        end;
+
+        TSystemsCursor = record
+          PlayCursor, WriteCursor, TargetCursor: TCursorPosition;
         end;
 
         TLockableRegion = record
          ToLock: TRegion;
          LockedRegions: array[0..1] of TRegion;
          State: TRegionState;
-         SystemPlayCursor, SystemWriteCursor: TValidCursorPos;
+         BuffersCursor: TSystemsCursor;
         end;
 
         WIN32SOUNDBUFFER = IDirectSoundBuffer;
 
         TSoundBuffer = record
-          RunningSampleIndex: TSampleIndex;
-          Playing: BOOL;
-          Content: WIN32SOUNDBUFFER;
-          LockableRegion: TLockableRegion;
+         Playing: BOOL;
+         LatencySampleCount: TSampleIndex;
+         RunningSampleIndex: TSampleIndex;
+         Content: WIN32SOUNDBUFFER;
+         LockableRegion: TLockableRegion;
         end;
 
         PSoundBuffer = ^TSoundBuffer;
@@ -77,136 +83,131 @@
 
   IMPLEMENTATION
       var
-        DS8: IDIRECTSOUND8;
+        DS8: IDirectSound8;
 
       {PRIVATE}
-      function CodeToErrorMsg(const errorCode: HRESULT): T_ERRORMSG;
+      function ErrCodeToErrMsg(const errorCode: HRESULT): T_ERRORMSG; inline;
       var
         messageBuffer: LPSTR;
       begin
         FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER or FORMAT_MESSAGE_FROM_SYSTEM or FORMAT_MESSAGE_IGNORE_INSERTS,
-                       nil, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), LPSTR(@messageBuffer), 0, nil);
+                       nil, errorCode, MAKELANGID(LANG_NEUTRAL, LANG_ENGLISH), LPSTR(@messageBuffer), 0, nil);
 
         result := T_ERRORMSG(messageBuffer);
       end;
 
       procedure UnlockRegion(const soundBuffer: PSoundBuffer);
-        var
-          result: HRESULT;
+      var
+        result: HRESULT;
       begin
-        result := soundBuffer^.Content.Unlock
-        (
-          soundBuffer^.LockableRegion.LockedRegions[0].Start, soundBuffer^.LockableRegion.LockedRegions[0].Size,
-          soundBuffer^.LockableRegion.LockedRegions[1].Start, soundBuffer^.LockableRegion.LockedRegions[1].Size
-        );
+        with soundBuffer^.LockableRegion do
+        begin
+          result := soundBuffer^.Content.Unlock
+          (
+            Pointer(@LockedRegions[0].Start), LockedRegions[0].Size,
+            Pointer(@LockedRegions[1].Start), LockedRegions[1].Size
+          );
 
-        soundBuffer^.LockableRegion.State.Locked := (result < 0);
-        soundBuffer^.LockableRegion.State.ErrorMsg := CodeToErrorMsg(result);
+          State.Locked := (result < 0);
+          State.ErrorMsg := ErrCodeToErrMsg(result);
+          State.HowOftenCalled += 1;
+        end;
       end;
 
       procedure LockRegion(const soundBuffer: PSoundBuffer);
         function compute_region_toLock: TRegion;
           var
             positionValid: boolean;
-            StartByteToLockFrom, playCursor, writeCursor: TBufferSize;
-            nrOfBytesToWrite: TBufferSize = 0;
+            StartByteToLockFrom: TBufferSize;
+            nrOfBytesToLock: TBufferSize = 0;
         begin
-          positionValid := soundBuffer^.Content.
-                                        GetCurrentPosition
-                                        (@soundBuffer^.LockableRegion.SystemPlayCursor,
-                                         @soundBuffer^.LockableRegion.SystemWriteCursor
-                                        ) >= 0;
-
-          if not positionValid then
+          with soundBuffer^.LockableRegion.BuffersCursor do
           begin
-            result.Size := 0;
-            result.Start := nil;
-            exit;
+            positionValid := soundBuffer^.Content.
+                                          GetCurrentPosition(@PlayCursor, @WriteCursor) >= 0;
+            if positionValid then
+            begin
+              TargetCursor := ((soundBuffer^.LatencySampleCount * TSampleInfo.SIZE) + PlayCursor) mod high(TBufferSize);
+              StartByteToLockFrom := (soundBuffer^.RunningSampleIndex * TSampleInfo.SIZE) mod high(TBufferSize);
+
+              if StartByteToLockFrom < TargetCursor then
+                nrOfBytesToLock := TBufferSize(TargetCursor - StartByteToLockFrom)
+
+              else if StartByteToLockFrom >= TargetCursor then
+                nrOfBytesToLock := TBufferSize((high(TBufferSIZE) - StartByteToLockFrom) + TargetCursor);
+
+              result.Size := nrOfBytesToLock;
+              result.Start := StartByteToLockFrom;
+            end;
           end;
-
-          StartByteToLockFrom := (soundBuffer^.RunningSampleIndex * TSampleInfo.SIZE) mod high(TBufferSize);
-
-          playCursor := soundBuffer^.LockableRegion.SystemPlayCursor;
-          writeCursor := soundBuffer^.LockableRegion.SystemWriteCursor;
-          {$region Buffer allocation bug here}
-
-          if StartByteToLockFrom < playCursor then
-            nrOfBytesToWrite := (playCursor - StartByteToLockFrom)
-
-          else if StartByteToLockFrom > playCursor then
-            nrOfBytesToWrite := (high(TBufferSIZE) - StartByteToLockFrom) + playCursor
-
-          else if StartByteToLockFrom = playCursor then
-            nrOfBytesToWrite := (high(TBufferSIZE) - playCursor);
-
-          {$endregion}
-
-          result.Size := nrOfBytesToWrite;
-          result.Start := LPVOID(@StartByteToLockFrom);
         end;
 
         function get_whole_buffer: TRegion; inline;
         var
           firstByte: Byte = 0;
         begin
-          result.Start := @firstByte;
-          result.Size := high(TBufferSIZE);
+          result.Start := firstByte;
+          result.Size := high(TBufferSize);//soundBuffer^.LatencySampleCount * TSampleInfo.SIZE;
         end;
 
         procedure internal_lock; inline;
           var result: HRESULT;
         begin
-          result := soundBuffer^.Content.Lock
-          (
-            (LPDWORD(soundBuffer^.LockableRegion.ToLock.Start))^, soundBuffer^.LockableRegion.ToLock.Size,
-            @soundBuffer^.LockableRegion.LockedRegions[0].Start, @soundBuffer^.LockableRegion.LockedRegions[0].Size,
-            @soundBuffer^.LockableRegion.LockedRegions[1].Start, @soundBuffer^.LockableRegion.LockedRegions[1].Size,
-            0
-          );
+          with soundBuffer^.LockableRegion do
+          begin
+            result := soundBuffer^.Content.Lock
+            (
+              ToLock.Start, ToLock.Size,
+              Pointer(@LockedRegions[0].Start), @LockedRegions[0].Size,
+              Pointer(@LockedRegions[1].Start), @LockedRegions[1].Size,
+              0
+            );
 
-          soundBuffer^.LockableRegion.State.Locked := (result >= 0);
-          soundBuffer^.LockableRegion.State.ErrorMsg := CodeToErrorMsg(result);
+            State.Locked := (result >= 0);
+            State.ErrorMsg := ErrCodeToErrMsg(result);
+            State.HowOftenCalled += 1;
+          end;
         end;
       begin
         if not soundBuffer^.Playing then
-          soundBuffer^.LockableRegion.ToLock := get_whole_buffer
+          soundBuffer^.LockableRegion.ToLock := get_whole_buffer()
 
         else
-          soundBuffer^.LockableRegion.ToLock := compute_region_toLock;
+          soundBuffer^.LockableRegion.ToLock := compute_region_toLock();
 
-        internal_lock;
+        internal_lock();
       end;
 
       procedure WriteSamplesTolockedRegion(const lockedRegion: TRegion; var runningSampleIndex: TSampleIndex);
-        var
-         totalSampleCount: TSampleIndex = 0;
-         firstSample: PSampleChannels;
-         volume: TSoundVolume;
-         SampleIndex: TSampleIndex;
+      var
+       totalSampleCount: TSampleIndex = 0;
+       firstSample: PSampleChannels;
+       volume: TSoundVolume;
+       SampleIndex: TSampleIndex;
 
-        function get_sine_volume: TSoundVolume; inline;
-        var time, sinus: real;
-        begin
-          time := TWaveCycle.DURATION * Real(runningSampleIndex) / Real(TSampleInfo.SAMPLESPERWAVECYCLE);
-          sinus := Real(sin(time));
-          result := TSoundVolume(Trunc(sinus * TSampleInfo.CHANNELVOLUME));
-        end;
+      function get_sine_volume: TSoundVolume; inline;
+      var time, sinus: real;
+      begin
+        time := TWaveCycle.DURATION * Real(runningSampleIndex) / Real(TSampleInfo.SAMPLESPERWAVECYCLE);
+        sinus := Real(sin(time));
+        result := TSoundVolume(Trunc(sinus * TSampleInfo.CHANNELVOLUME));
+      end;
 
-        function get_square_volume: TSoundVolume; inline;
-          var relativeSampleIndex: TSampleIndex;
-        begin
-          relativeSampleIndex := (runningSampleIndex div TWaveCycle.HALFWAVEFREQUENCY);
-          if (relativeSampleIndex mod 2) = 0 then
-            result := TSampleInfo.CHANNELVOLUME
-          else
-            result := -TSampleInfo.CHANNELVOLUME;
-        end;
+      function get_square_volume: TSoundVolume; inline;
+      var relativeSampleIndex: TSampleIndex;
+      begin
+        relativeSampleIndex := (runningSampleIndex div TWaveCycle.HALFWAVEFREQUENCY);
+        if (relativeSampleIndex mod 2) = 0 then
+          result := TSampleInfo.CHANNELVOLUME
+        else
+          result := -TSampleInfo.CHANNELVOLUME;
+      end;
       begin
         if lockedRegion.Size = 0 then exit;
 
         totalSampleCount := TSampleIndex(Round(lockedRegion.Size / TSampleInfo.SIZE) - 1);
 
-        firstSample := PSampleChannels(lockedRegion.Start);
+        firstSample := PSampleChannels(@lockedRegion.Start);
 
         for SampleIndex := 0 to totalSampleCount do
         begin
@@ -221,7 +222,7 @@
 
 
       {PUBLIC}
-      function EnableSoundProcessing(const hwnd: HWND): BOOL;
+      function EnableSoundProcessing(const hwnd: HWND): BOOL; inline;
       begin
         result := (DirectSoundCreate8(nil, DS8, nil) >= 0);
         result := result and (Ds8.SetCooperativeLevel(hwnd, DSSCL_PRIORITY) >= 0);
@@ -250,9 +251,11 @@
         soundBuffer := default(TSoundBuffer);
         soundBuffer.Playing := false;
         soundBuffer.RunningSampleIndex := 0;
-        soundBuffer.LockableRegion.SystemPlayCursor := DEFAULT_CURSOR_POS;
-        soundBuffer.LockableRegion.State.Locked   := false;
-        soundBuffer.LockableRegion.State.ErrorMsg := 'NONE';
+        soundBuffer.LatencySampleCount := TSampleInfo.SAMPLESPERSECOND div 16;
+        soundBuffer.LockableRegion.BuffersCursor.PlayCursor :=  DEFAULT_CURSOR_POS;
+        soundBuffer.LockableRegion.BuffersCursor.WriteCursor := DEFAULT_CURSOR_POS;
+        soundBuffer.LockableRegion.State.Locked   :=    false;
+        soundBuffer.LockableRegion.State.ErrorMsg :=    'NO ERRORS';
 
         bufferCreated := DS8.CreateSoundBuffer(bfdesc, soundBuffer.Content, nil) >= 0;
 
@@ -264,7 +267,9 @@
         LockRegion(soundBuffer);
 
         if not soundBuffer^.LockableRegion.State.Locked then
-          raise Exception.Create('The specified region could not be locked because of: ' + soundBuffer^.LockableRegion.State.ErrorMsg);
+          raise Exception.Create(
+                                 'The specified region could not be locked because of: ' + soundBuffer^.LockableRegion.State.ErrorMsg +
+                                 IntToStr(soundBuffer^.LockableRegion.State.HowOftenCalled));
 
         (*LockedRegion1*)
         WriteSamplesTolockedRegion(soundBuffer^.LockableRegion.LockedRegions[0], soundBuffer^.RunningSampleIndex);
@@ -278,7 +283,7 @@
           raise Exception.Create('The specified region could not be unlocked because of: ' + soundBuffer^.LockableRegion.State.ErrorMsg);
       end;
 
-      procedure PlayTheSoundBuffer(const soundBuffer: PSoundBuffer);
+      procedure PlayTheSoundBuffer(const soundBuffer: PSoundBuffer); inline;
       begin
         if not soundBuffer^.Playing then
           soundBuffer^.Playing := soundBuffer^.Content.Play(0, 0, DSBPLAY_LOOPING) >= 0;

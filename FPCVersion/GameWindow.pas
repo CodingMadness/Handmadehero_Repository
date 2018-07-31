@@ -1,7 +1,7 @@
 ﻿unit GameWindow;
 
   interface
-      uses windows;
+      uses windows, sysutils;
 
       const
         MIN_WIDTH = 800;
@@ -11,6 +11,7 @@
         ONE_GAMEHWND: HWND;
 
       type
+        Int128 = Int128Rec;
         TMaxWidth  =  0..MIN_WIDTH;
         TMaxHeight =  0..MIN_HEIGHT;
         TWindowArea = 0..(MIN_WIDTH * MIN_HEIGHT);
@@ -33,9 +34,9 @@
         GameGraphics;
 
       var
-        RUNNING: boolean;
+        RUNNING: BOOL;
         ONE_PIXELBUFFER: TPixelBuffer;
-        ONE_SOUNDBUFFER: TSoundBuffer;
+        ONE_SOUNDBUFFER, COPY: TSoundBuffer;
         ONE_GAMEWINDOW: Rect;
         ONE_DC: HDC;
 
@@ -105,7 +106,7 @@
         toAlloc^.lpszMenuName := 'Handmade Hero';
       end;
 
-      function RegisterWindow(const wnd: PWNDCLASS): Bool;
+      function RegisterWindow(const wnd: PWNDCLASS): BOOL;
       begin
         Result := RegisterClass(wnd^) <> 0;
       end;
@@ -137,21 +138,18 @@
         x, y: integer;
       begin
         RUNNING := True;
-        x := 0;
-        y := 0;
 
         if EnableSoundProcessing(ONE_GAMEHWND) then
         begin
           CreateSoundBuffer(ONE_SOUNDBUFFER);
-          {Write the whole buffer full with sound-data}
-          WriteSamplesToSoundBuffer(@ONE_SOUNDBUFFER);
-          PlayTheSoundBuffer(@ONE_SOUNDBUFFER);
+          COPY := ONE_SOUNDBUFFER;
         end;
 
         while RUNNING do
         begin
           ProceedWin32MessagesFromAppQueue;
           WriteSamplesToSoundBuffer(@ONE_SOUNDBUFFER);
+          PlayTheSoundBuffer(@ONE_SOUNDBUFFER);
           WritePixelsToBuffer(@ONE_PIXELBUFFER, x, y);
           DrawPixelBuffer(ONE_DC, @ONE_PIXELBUFFER, @ONE_GAMEWINDOW);
           Inc(x);
