@@ -23,6 +23,8 @@
           const CHANNELCOUNT = 2;
           const CHANNELVOLUME = 10000;
           const SAMPLESPERSECOND = 48000;
+          const LATENCYSAMPLECOUNT = SAMPLESPERSECOND div 16;
+          const LATENCYSAMPLEBYTECOUNT = LATENCYSAMPLECOUNT * SIZE;
           const SAMPLESPERWAVECYCLE = SAMPLESPERSECOND div TWaveCycle.WAVEFREQUENCY;
         end;
 
@@ -68,7 +70,6 @@
 
         TSoundBuffer = record
          Playing: BOOL;
-         LatencySampleCount: TSampleIndex;
          RunningSampleIndex: TSampleIndex;
          Content: WIN32SOUNDBUFFER;
          LockableRegion: TLockableRegion;
@@ -127,7 +128,7 @@
                                           GetCurrentPosition(@PlayCursor, @WriteCursor) >= 0;
             if positionValid then
             begin
-              TargetCursor := ((soundBuffer^.LatencySampleCount * TSampleInfo.SIZE) + PlayCursor) mod high(TBufferSize);
+              TargetCursor := (TSampleInfo.LATENCYSAMPLEBYTECOUNT + PlayCursor) mod high(TBufferSize);
               StartByteToLockFrom := (soundBuffer^.RunningSampleIndex * TSampleInfo.SIZE) mod high(TBufferSize);
 
               if StartByteToLockFrom < TargetCursor then
@@ -142,12 +143,12 @@
           end;
         end;
 
-        function get_whole_buffer: TRegion; inline;
+        function get_fix_region: TRegion; inline;
         var
           firstByte: Byte = 0;
         begin
           result.Start := firstByte;
-          result.Size := high(TBufferSize);//soundBuffer^.LatencySampleCount * TSampleInfo.SIZE;
+          result.Size := TSampleInfo.LATENCYSAMPLEBYTECOUNT;
         end;
 
         procedure internal_lock; inline;
@@ -169,8 +170,9 @@
           end;
         end;
       begin
+
         if not soundBuffer^.Playing then
-          soundBuffer^.LockableRegion.ToLock := get_whole_buffer()
+          soundBuffer^.LockableRegion.ToLock := get_fix_region()
 
         else
           soundBuffer^.LockableRegion.ToLock := compute_region_toLock();
@@ -190,7 +192,7 @@
       begin
         time := TWaveCycle.DURATION * Real(runningSampleIndex) / Real(TSampleInfo.SAMPLESPERWAVECYCLE);
         sinus := Real(sin(time));
-        result := TSoundVolume(Trunc(sinus * TSampleInfo.CHANNELVOLUME));
+        result := TSoundVolume(Round(sinus * TSampleInfo.CHANNELVOLUME));
       end;
 
       function get_square_volume: TSoundVolume; inline;
@@ -251,9 +253,9 @@
         soundBuffer := default(TSoundBuffer);
         soundBuffer.Playing := false;
         soundBuffer.RunningSampleIndex := 0;
-        soundBuffer.LatencySampleCount := TSampleInfo.SAMPLESPERSECOND div 16;
         soundBuffer.LockableRegion.BuffersCursor.PlayCursor :=  DEFAULT_CURSOR_POS;
         soundBuffer.LockableRegion.BuffersCursor.WriteCursor := DEFAULT_CURSOR_POS;
+        soundBuffer.LockableRegion.BuffersCursor.TargetCursor := DEFAULT_CURSOR_POS;
         soundBuffer.LockableRegion.State.Locked   :=    false;
         soundBuffer.LockableRegion.State.ErrorMsg :=    'NO ERRORS';
 

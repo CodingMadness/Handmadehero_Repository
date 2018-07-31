@@ -142,7 +142,7 @@
         if EnableSoundProcessing(ONE_GAMEHWND) then
         begin
           CreateSoundBuffer(ONE_SOUNDBUFFER);
-          COPY := ONE_SOUNDBUFFER;
+          {COPY := ONE_SOUNDBUFFER;}
         end;
 
         while RUNNING do
