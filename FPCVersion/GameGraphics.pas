@@ -20,21 +20,21 @@ interface
     public
       INFO: BITMAPINFO;
       Content: PPixel;
-      Width: TMaxWidth;
-      Height: TMaxHeight;
+      Width: TWidth;
+      Height: THeight;
       Area: TWindowArea;
       TotalByteCount: TByteCount;
     end;
 
     PPixelBuffer = ^TPixelBuffer;
 
-  procedure CreateWindowSizedBuffer(const pixelBuffer: PPixelBuffer; const wndWidth: TMaxWidth; const wndHeight: TMaxHeight);
+  procedure CreateWindowSizedBuffer(const pixelBuffer: PPixelBuffer; const wndWidth: TWidth; const wndHeight: THeight);
   procedure WritePixelsToBuffer(const pixelBuffer: PPixelBuffer; const xOffset, yOffset: integer);
   procedure DrawPixelBuffer(const phdc: HDC; const pixelBuffer: PPixelBuffer; const gameWindowRect: PRect);
 
   implementation
     {PRIVATE}
-    function CreatePixel(const r,g,b: integer): TPixel;
+    function CreatePixel(const r,g,b: integer): TPixel; inline;
     begin
       {Assignment based on the endianess of the underlying machine}
       result.PADDING := 0;
@@ -44,22 +44,24 @@ interface
     end;
 
     procedure FillPixelBuffer(const pixelBuffer: PPixelBuffer;
-                              const windowData: TWindowData); inline;
+                              const width: TWidth;
+                              const height: THeight); inline;
     begin
-      pixelBuffer^.Height := windowData.Height;
-      pixelBuffer^.Width := windowData.Width;
-      pixelBuffer^.Area := windowData.Width * windowData.Height;
+      pixelBuffer^.Height := Height;
+      pixelBuffer^.Width := Width;
+      pixelBuffer^.Area := TWindowArea(Width * Height);
       pixelBuffer^.TotalByteCount := pixelBuffer^.Area * PIXELSIZE;
       pixelBuffer^.Content := PPixel(VirtualAlloc(nil, pixelBuffer^.TotalByteCount, MEM_COMMIT, PAGE_READWRITE));
     end;
 
     procedure EnableGraphicProcessing(const pixelBuffer: PPixelBuffer;
-                                      const windowData: TWindowData); inline;
+                                      const width: TWidth;
+                                      const height: THeight); inline;
     begin
       pixelBuffer^.INFO := default(BITMAPINFO);
       pixelBuffer^.INFO.bmiHeader.biSize := sizeOf(pixelBuffer^.INFO.bmiHeader);
-      pixelBuffer^.INFO.bmiHeader.biWidth := windowData.Width;
-      pixelBuffer^.INFO.bmiHeader.biHeight := (-1 * windowData.Height);
+      pixelBuffer^.INFO.bmiHeader.biWidth := width;
+      pixelBuffer^.INFO.bmiHeader.biHeight := -height;
       pixelBuffer^.INFO.bmiHeader.biPlanes := 1;
       pixelBuffer^.INFO.bmiHeader.biBitCount := 32;
       pixelBuffer^.INFO.bmiHeader.biCompression := BI_RGB;
@@ -68,18 +70,14 @@ interface
 
 
     {PUBLIC}
-    procedure CreateWindowSizedBuffer(const pixelBuffer: PPixelBuffer; const wndWidth: TMaxWidth; const wndHeight: TMaxHeight); inline;
-      var windowData: TWindowData;
+    procedure CreateWindowSizedBuffer(const pixelBuffer: PPixelBuffer; const wndWidth: TWidth; const wndHeight: THeight); inline;
     begin
       if pixelBuffer^.Content <> nil then
         writeLn('FREED MEMORY SUCCESSFULLY?  ' +
           BoolToStr(VirtualFree(pixelBuffer^.Content, 0, MEM_DECOMMIT)));
 
-      windowData.Width := wndWidth;
-      windowData.Height := wndHeight;
-
-      EnableGraphicProcessing(pixelBuffer, windowData);
-      FillPixelBuffer(pixelBuffer, windowData);
+      EnableGraphicProcessing(pixelBuffer, wndWidth, wndHeight);
+      FillPixelBuffer(pixelBuffer, wndWidth, wndHeight);
     end;
 
     procedure WritePixelsToBuffer(const pixelBuffer: PPixelBuffer; const xOffset, yOffset: integer);
@@ -98,6 +96,7 @@ interface
           current^ := CreatePixel((rowNr+xOffset), (columnNr+yOffset), (xOffset+yOffset));
           Inc(current);
         end;
+
         first += pixelBuffer^.Width;
       end;
     end;

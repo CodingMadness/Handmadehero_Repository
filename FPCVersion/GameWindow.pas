@@ -4,22 +4,18 @@
       uses windows, sysutils;
 
       const
-        MIN_WIDTH = 800;
-        MIN_HEIGHT = 600;
+        MIN_WIDTH   = 800;
+        MIN_HEIGHT  = 600;
+        MAX_WIDTH   = 3840;
+        MAX_HEIGHT  = 1080;
 
       var
         ONE_GAMEHWND: HWND;
 
       type
-        Int128 = Int128Rec;
-        TMaxWidth  =  0..MIN_WIDTH;
-        TMaxHeight =  0..MIN_HEIGHT;
-        TWindowArea = 0..(MIN_WIDTH * MIN_HEIGHT);
-
-        TWindowData = record
-          Width: TMaxWidth;
-          Height: TMaxHeight;
-        end;
+        TWidth  =  0..MAX_WIDTH;
+        THeight =  0..MAX_HEIGHT;
+        TWindowArea = 0..(MAX_WIDTH * MAX_HEIGHT);
 
       procedure CreateWindowObject(var toAlloc: PWNDCLASS);
       function RegisterWindow(const wnd: PWNDCLASS): Bool;
@@ -36,7 +32,7 @@
       var
         RUNNING: BOOL;
         ONE_PIXELBUFFER: TPixelBuffer;
-        ONE_SOUNDBUFFER, COPY: TSoundBuffer;
+        ONE_SOUNDBUFFER: TSoundBuffer;
         ONE_GAMEWINDOW: Rect;
         ONE_DC: HDC;
 
@@ -64,7 +60,7 @@
             WM_SIZE:
             begin
               GetClientRect(window, @ONE_GAMEWINDOW);
-              CreateWindowSizedBuffer(@ONE_PIXELBUFFER, TMaxWidth(ONE_GAMEWINDOW.Width), TMaxHeight(ONE_GAMEWINDOW.Height));
+              CreateWindowSizedBuffer(@ONE_PIXELBUFFER, TWidth(ONE_GAMEWINDOW.Width), THeight(ONE_GAMEWINDOW.Height));
             end;
 
             WM_QUIT: RUNNING := False;
@@ -137,6 +133,8 @@
       var
         x, y: integer;
       begin
+        x := 0;
+        y := 0;
         RUNNING := True;
 
         if EnableSoundProcessing(ONE_GAMEHWND) then
