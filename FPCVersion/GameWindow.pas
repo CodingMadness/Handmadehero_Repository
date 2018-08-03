@@ -80,7 +80,7 @@
             WM_PAINT:
             begin
               ONE_DC := BeginPaint(window, @paintobj);
-              WritePixelsToBuffer(@ONE_PIXELBUFFER, 0, 0);
+              WritePixelsToPixelBuffer(@ONE_PIXELBUFFER, 0, 0);
               DrawPixelBuffer(ONE_DC, @ONE_PIXELBUFFER, @ONE_GAMEWINDOW);
               EndPaint(window, @paintobj);
             end;
@@ -140,18 +140,19 @@
         if EnableSoundProcessing(ONE_GAMEHWND) then
         begin
           CreateSoundBuffer(ONE_SOUNDBUFFER);
-          {COPY := ONE_SOUNDBUFFER;}
-        end;
 
-        while RUNNING do
-        begin
-          ProceedWin32MessagesFromAppQueue;
-          WriteSamplesToSoundBuffer(@ONE_SOUNDBUFFER);
-          PlayTheSoundBuffer(@ONE_SOUNDBUFFER);
-          WritePixelsToBuffer(@ONE_PIXELBUFFER, x, y);
-          DrawPixelBuffer(ONE_DC, @ONE_PIXELBUFFER, @ONE_GAMEWINDOW);
-          Inc(x);
-          Inc(y);
+          while RUNNING do
+          begin
+            ProceedWin32MessagesFromAppQueue;
+          {-------------------------------------}
+            WriteSamplesToSoundBuffer(@ONE_SOUNDBUFFER);
+            PlayTheSoundBuffer(@ONE_SOUNDBUFFER);
+          {-------------------------------------}
+            WritePixelsToPixelBuffer(@ONE_PIXELBUFFER, x, y);
+            DrawPixelBuffer(ONE_DC, @ONE_PIXELBUFFER, @ONE_GAMEWINDOW);
+            Inc(x);
+            Inc(y);
+          end;
         end;
       end;
 end.
