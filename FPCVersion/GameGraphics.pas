@@ -29,7 +29,7 @@ interface
     PPixelBuffer = ^TPixelBuffer;
 
   procedure CreateWindowSizedBuffer(const pixelBuffer: PPixelBuffer; const wndWidth: TWidth; const wndHeight: THeight);
-  procedure WritePixelsToBuffer(const pixelBuffer: PPixelBuffer; const xOffset, yOffset: integer);
+  procedure WritePixelsToPixelBuffer(const pixelBuffer: PPixelBuffer; const xOffset, yOffset: integer);
   procedure DrawPixelBuffer(const phdc: HDC; const pixelBuffer: PPixelBuffer; const gameWindowRect: PRect);
 
   implementation
@@ -80,7 +80,7 @@ interface
       FillPixelBuffer(pixelBuffer, wndWidth, wndHeight);
     end;
 
-    procedure WritePixelsToBuffer(const pixelBuffer: PPixelBuffer; const xOffset, yOffset: integer);
+    procedure WritePixelsToPixelBuffer(const pixelBuffer: PPixelBuffer; const xOffset, yOffset: integer);
     var
       rowNr, columnNr: integer;
       first, current: PPixel;
