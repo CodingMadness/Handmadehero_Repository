@@ -1,21 +1,24 @@
 ﻿unit GameWindow;
 
   interface
-      uses windows, sysutils;
+      uses windows;
 
       const
-        MIN_WIDTH   = 800;
-        MIN_HEIGHT  = 600;
-        MAX_WIDTH   = 3840;
-        MAX_HEIGHT  = 1080;
+        MIN_WIDTH = 800;
+        MIN_HEIGHT = 600;
 
       var
         ONE_GAMEHWND: HWND;
 
       type
-        TWidth  =  0..MAX_WIDTH;
-        THeight =  0..MAX_HEIGHT;
-        TWindowArea = 0..(MAX_WIDTH * MAX_HEIGHT);
+        TMaxWidth  =  0..MIN_WIDTH;
+        TMaxHeight =  0..MIN_HEIGHT;
+        TWindowArea = 0..(MIN_WIDTH * MIN_HEIGHT);
+
+        TWindowData = record
+          Width: TMaxWidth;
+          Height: TMaxHeight;
+        end;
 
       procedure CreateWindowObject(var toAlloc: PWNDCLASS);
       function RegisterWindow(const wnd: PWNDCLASS): Bool;
@@ -30,7 +33,7 @@
         GameGraphics;
 
       var
-        RUNNING: BOOL;
+        RUNNING: boolean;
         ONE_PIXELBUFFER: TPixelBuffer;
         ONE_SOUNDBUFFER: TSoundBuffer;
         ONE_GAMEWINDOW: Rect;
@@ -60,7 +63,7 @@
             WM_SIZE:
             begin
               GetClientRect(window, @ONE_GAMEWINDOW);
-              CreateWindowSizedBuffer(@ONE_PIXELBUFFER, TWidth(ONE_GAMEWINDOW.Width), THeight(ONE_GAMEWINDOW.Height));
+              CreateWindowSizedBuffer(@ONE_PIXELBUFFER, TMaxWidth(ONE_GAMEWINDOW.Width), TMaxHeight(ONE_GAMEWINDOW.Height));
             end;
 
             WM_QUIT: RUNNING := False;
@@ -80,7 +83,7 @@
             WM_PAINT:
             begin
               ONE_DC := BeginPaint(window, @paintobj);
-              WritePixelsToPixelBuffer(@ONE_PIXELBUFFER, 0, 0);
+              WritePixelsToBuffer(@ONE_PIXELBUFFER, 0, 0);
               DrawPixelBuffer(ONE_DC, @ONE_PIXELBUFFER, @ONE_GAMEWINDOW);
               EndPaint(window, @paintobj);
             end;
@@ -102,7 +105,7 @@
         toAlloc^.lpszMenuName := 'Handmade Hero';
       end;
 
-      function RegisterWindow(const wnd: PWNDCLASS): BOOL;
+      function RegisterWindow(const wnd: PWNDCLASS): Bool;
       begin
         Result := RegisterClass(wnd^) <> 0;
       end;
@@ -133,26 +136,26 @@
       var
         x, y: integer;
       begin
+        RUNNING := True;
         x := 0;
         y := 0;
-        RUNNING := True;
 
         if EnableSoundProcessing(ONE_GAMEHWND) then
         begin
           CreateSoundBuffer(ONE_SOUNDBUFFER);
+          {Write the whole buffer full with sound-data}
+          WriteSamplesToSoundBuffer(@ONE_SOUNDBUFFER);
+          PlayTheSoundBuffer(@ONE_SOUNDBUFFER);
+        end;
 
-          while RUNNING do
-          begin
-            ProceedWin32MessagesFromAppQueue;
-          {-------------------------------------}
-            WriteSamplesToSoundBuffer(@ONE_SOUNDBUFFER);
-            PlayTheSoundBuffer(@ONE_SOUNDBUFFER);
-          {-------------------------------------}
-            WritePixelsToPixelBuffer(@ONE_PIXELBUFFER, x, y);
-            DrawPixelBuffer(ONE_DC, @ONE_PIXELBUFFER, @ONE_GAMEWINDOW);
-            Inc(x);
-            Inc(y);
-          end;
+        while RUNNING do
+        begin
+          ProceedWin32MessagesFromAppQueue;
+          WriteSamplesToSoundBuffer(@ONE_SOUNDBUFFER);
+          WritePixelsToBuffer(@ONE_PIXELBUFFER, x, y);
+          DrawPixelBuffer(ONE_DC, @ONE_PIXELBUFFER, @ONE_GAMEWINDOW);
+          Inc(x);
+          Inc(y);
         end;
       end;
 end.
