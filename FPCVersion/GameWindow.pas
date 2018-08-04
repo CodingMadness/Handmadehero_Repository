@@ -6,6 +6,8 @@
       const
         MIN_WIDTH = 800;
         MIN_HEIGHT = 600;
+        MAX_WIDTH = 3840;
+        MAX_HEIGHT = 1200;
 
       var
         ONE_GAMEHWND: HWND;
@@ -13,12 +15,7 @@
       type
         TMaxWidth  =  0..MIN_WIDTH;
         TMaxHeight =  0..MIN_HEIGHT;
-        TWindowArea = 0..(MIN_WIDTH * MIN_HEIGHT);
-
-        TWindowData = record
-          Width: TMaxWidth;
-          Height: TMaxHeight;
-        end;
+        TWindowArea = 0..(MAX_WIDTH * MAX_HEIGHT);
 
       procedure CreateWindowObject(var toAlloc: PWNDCLASS);
       function RegisterWindow(const wnd: PWNDCLASS): Bool;

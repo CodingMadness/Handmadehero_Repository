@@ -38,9 +38,9 @@
 
         TBufferSize  =  0..(TSampleInfo.SAMPLESPERSECOND * TSampleInfo.SIZE);
 
-        TValidCursorPos = DEFAULT_CURSOR_POS..high(DWORD);
+        TCursorPosition = DEFAULT_CURSOR_POS..high(DWORD);
 
-        TERRMSG = String[SENSEFUL_ERROR_LENGTH];
+        ERRORMESSAGETEXT = String[SENSEFUL_ERROR_LENGTH];
 
         TRegion = packed record
          Start: LPVOID;
@@ -49,14 +49,14 @@
 
         TRegionState = record
           Locked: BOOL;
-          ErrorMsg: TERRMSG;
+          ErrorMsg: ERRORMESSAGETEXT;
         end;
 
         TLockableRegion = record
          ToLock: TRegion;
          LockedRegions: array[0..1] of TRegion;
          State: TRegionState;
-         SystemPlayCursor: TValidCursorPos;
+         SystemPlayCursor: TCursorPosition;
         end;
 
         TSoundBuffer = record
@@ -78,14 +78,14 @@
         DS8: IDIRECTSOUND8;
 
       {PRIVATE}
-      function CodeToErrorMsg(const errorCode: HRESULT): TERRMSG;
+      function CodeToErrorMsg(const errorCode: HRESULT): ERRORMESSAGETEXT;
       var
         messageBuffer: LPSTR;
       begin
         FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER or FORMAT_MESSAGE_FROM_SYSTEM or FORMAT_MESSAGE_IGNORE_INSERTS,
                        nil, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), LPSTR(@messageBuffer), 0, nil);
 
-        result := TERRMSG(messageBuffer);
+        result := ERRORMESSAGETEXT(messageBuffer);
       end;
 
       procedure UnlockRegion(const soundBuffer: PSoundBuffer);
