@@ -12,7 +12,7 @@ interface
       TCallReturnMessage = String[SENSEFUL_ERROR_LENGTH];
 
       TLockState = record
-        ID: Extended;
+        ID: QWORD;
         Locked: BOOL;
         Message: TCallReturnMessage;
       end;
@@ -25,20 +25,22 @@ interface
 
         function GetLocked: bool;
         function GetReturnMessage: TCallReturnMessage;
-        function GetID: Extended;
+        function GetID: QWORD;
 
       public
         property Locked:        BOOL                   read GetLocked;
         property ReturnMessage: TCallReturnMessage     read GetReturnMessage;
-        property CurrentID:     Extended               read GetID;
+        property CurrentID:     QWORD                  read GetID;
         constructor Init(const currState: PLockState);
       end;
 
       EUnlock = class(ELock);
 
      function GetFunctionReturnMessage(const returnCode: HRESULT): TCallReturnMessage;
+     procedure WriteLockState(const currState: PLockState);
 
 implementation
+    {ELock/EUnlock}
     constructor ELock.Init(const currState: PLockState);
     begin
       fLockState := currState;
@@ -54,10 +56,11 @@ implementation
       result := fLockState^.Message;
     end;
 
-    function ELock.GetID: Extended;
+    function ELock.GetID: QWORD;
     begin
       result := fLockState^.ID;
     end;
+    {ELock/EUnlock}
 
     function GetFunctionReturnMessage(const returnCode: HRESULT): TCallReturnMessage;
     var
@@ -75,5 +78,14 @@ implementation
       LocalFree(hMem);
       msgBuf := nil;
     end;
+
+    procedure WriteLockState(const currState: PLockState);
+    begin
+      writeln('Count of successful function calls until an exception was raised: ', currState^.ID);
+      writeln('Success of the specific function: ', currState^.Locked);
+      writeln('Result message from the call of the respected function: ', currState^.Message);
+      writeln;
+    end;
+
 end.
 

@@ -155,7 +155,6 @@
           soundBuffer^.LockableRegion.ToLock := specificRegion
 
         else
-          //computedRegion raises an error due to wrong computation
           soundBuffer^.LockableRegion.ToLock := computedRegion;
 
         DoInternalLock;
@@ -258,8 +257,7 @@
 
         with soundBuffer^.LockableRegion do
         begin
-          if not StateAfterLock.Locked then
-            //raise ELock.Init(@StateAfterLock);
+          if not StateAfterLock.Locked then exit;
 
           (*LockedRegion1*)
           WriteSamplesTolockedRegion(LockedRegions[0], soundBuffer^.RunningSampleIndex);
@@ -268,9 +266,6 @@
           WriteSamplesTolockedRegion(LockedRegions[1], soundBuffer^.RunningSampleIndex);
 
           UnlockRegionsWithin(soundBuffer);
-
-          if StateAfterUnLock.Locked then
-            //raise EUnlock.Init(@StateAfterUnLock);
         end;
       end;
 
