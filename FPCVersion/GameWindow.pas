@@ -140,19 +140,23 @@
         if EnableSoundProcessing(ONE_GAMEHWND) then
         begin
           CreateSoundBuffer(ONE_SOUNDBUFFER);
-          {Write the whole buffer full with sound-data}
-          WriteSamplesToSoundBuffer(@ONE_SOUNDBUFFER);
-          PlayTheSoundBuffer(@ONE_SOUNDBUFFER);
         end;
 
         while RUNNING do
         begin
           ProceedWin32MessagesFromAppQueue;
+
+          {......................................}
           WriteSamplesToSoundBuffer(@ONE_SOUNDBUFFER);
+          PlayTheSoundBuffer(@ONE_SOUNDBUFFER);
+          {......................................}
+
+          {......................................}
           WritePixelsToBuffer(@ONE_PIXELBUFFER, x, y);
           DrawPixelBuffer(ONE_DC, @ONE_PIXELBUFFER, @ONE_GAMEWINDOW);
           Inc(x);
           Inc(y);
+          {......................................}
         end;
       end;
 end.
