@@ -36,21 +36,16 @@
 
         PSampleChannels = ^TSampleChannels;
 
-        TSampleIndex = 0..(TSampleInfo.SAMPLESPERSECOND-1);
+        TSampleIndex =  0..(TSampleInfo.SAMPLESPERSECOND-1);
 
         TBufferSize  =  0..(TSampleInfo.SAMPLESPERSECOND * TSampleInfo.SIZE);
 
         TCursorPosition = DEFAULT_CURSOR_POS..high(DWORD);
 
-        TRegion = packed record
+        TRegion = record
          Start: LPVOID;
          Size: TBufferSize;
        end;
-
-        TRegionState = record
-          Locked: BOOL;
-          Message: TCallReturnMessage;
-        end;
 
         TSystemCursor = record
           PlayCursor,
@@ -61,7 +56,7 @@
         TLockableRegion = record
          ToLock: TRegion;
          LockedRegions: array[0..1] of TRegion;
-         State: TRegionState;
+         State: TLockState;
          Cursor: TSystemCursor;
         end;
 
@@ -102,7 +97,6 @@
       end;
 
       procedure LockRegionsWithin(const soundBuffer: PSoundBuffer);
-        //Change 3.
         function specificRegion: TRegion;
         var first: DWORD = 0;
         begin
@@ -110,7 +104,6 @@
           result.Size := TSampleInfo.LATENCYSAMPLECOUNT;
         end;
 
-        //Change 4.
         function computedRegion: TRegion;
         var
           positionValid: boolean;
@@ -123,7 +116,7 @@
                                           GetCurrentPosition(@PlayCursor, @WriteCursor) >= 0;
             if positionValid then
             begin
-              TargetCursor := (TSampleInfo.LATENCYSAMPLEBYTECOUNT + PlayCursor) mod high(TBufferSize);
+              TargetCursor := TCursorPosition(TSampleInfo.LATENCYSAMPLEBYTECOUNT + PlayCursor) mod high(TBufferSize);
               StartByteToLockFrom := (soundBuffer^.RunningSampleIndex * TSampleInfo.SIZE) mod high(TBufferSize);
 
               if StartByteToLockFrom < TargetCursor then
@@ -264,7 +257,7 @@
         with soundBuffer^.LockableRegion do
         begin
           if not State.Locked then
-            raise ELocking.Create(State.Message, State.Locked);
+            raise ELock.Init(@State);
 
           (*LockedRegion1*)
           WriteSamplesTolockedRegion(LockedRegions[0], soundBuffer^.RunningSampleIndex);
@@ -275,7 +268,7 @@
           UnlockRegionsWithin(soundBuffer);
 
           if State.Locked then
-            raise ELocking.Create(State.Message, State.Locked);
+            raise EUnlock.Init(@State);
         end;
       end;
 

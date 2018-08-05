@@ -11,25 +11,52 @@ interface
     type
       TCallReturnMessage = String[SENSEFUL_ERROR_LENGTH];
 
-      ELocking = class(Exception)
-      private
-        fLocked: BOOL;
-        fReturnMsg: TCallReturnMessage;
-      public
-        property Locked: BOOL read fLocked;
-        property ReturnMessage: TCallReturnMessage read fReturnMsg;
-        constructor Create(const msg: TCallReturnMessage; isLocked: BOOL);
+      TLockState = record
+        ID: Extended;
+        Locked: BOOL;
+        Message: TCallReturnMessage;
       end;
 
-      //EUnlocking = class(Elocking);
+      PLockState = ^TLockState;
+
+      ELock = class(Exception)
+      private
+        fLockState: TLockState;
+
+        function GetLocked: bool;
+        function GetReturnMessage: TCallReturnMessage;
+        function GetID: Extended;
+
+      public
+        property Locked:        BOOL                   read GetLocked;
+        property ReturnMessage: TCallReturnMessage     read GetReturnMessage;
+        property CurrentID:     Extended               read GetID;
+        constructor Init(const currState: PLockState);
+      end;
+
+      EUnlock = class(ELock);
 
      function GetFunctionReturnMessage(const returnCode: HRESULT): TCallReturnMessage;
 
 implementation
-    constructor Elocking.Create(const msg: TCallReturnMessage; isLocked: BOOL);
+    constructor ELock.Init(const currState: PLockState);
     begin
-      fLocked := isLocked;
-      fReturnMsg := msg;
+      fLockState := currState;
+    end;
+
+    function ELock.GetLocked: BOOL;
+    begin
+      result := fLockState^.Locked;
+    end;
+
+    function ELock.GetReturnMessage: TCallReturnMessage;
+    begin
+      result := fLockState^.Message;
+    end;
+
+    function ELock.GetID: Extended;
+    begin
+      result := fLockState^.ID;
     end;
 
     function GetFunctionReturnMessage(const returnCode: HRESULT): TCallReturnMessage;
@@ -41,8 +68,8 @@ implementation
     begin
       msgBuf := nil;
       bufferFlags := DWORD(FORMAT_MESSAGE_ALLOCATE_BUFFER or FORMAT_MESSAGE_FROM_SYSTEM or FORMAT_MESSAGE_IGNORE_INSERTS);
-      currLang := MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
-      FormatMessageA(bufferFlags, nil, returnCode, currLang, LPSTR(@msgBuf), 0, nil);
+      currLang := DWORD(MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT));
+      FormatMessageA(bufferFlags, nil, DWORD(returnCode), currLang, LPSTR(@msgBuf), 0, nil);  //range check error
       result := TCallReturnMessage(msgBuf);
       hMem := PQWord(@msgBuf)^;
       LocalFree(hMem);
