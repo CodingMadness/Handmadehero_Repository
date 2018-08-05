@@ -56,8 +56,8 @@
         TLockableRegion = record
          ToLock: TRegion;
          LockedRegions: array[0..1] of TRegion;
-         State: TLockState;
          Cursor: TSystemCursor;
+         StateAfterLock, StateAfterUnlock: TLockState;
         end;
 
         TSoundBuffer = record
@@ -91,8 +91,9 @@
             LockedRegions[1].Start, LockedRegions[1].Size
           );
 
-          State.Locked := (tmp < 0);
-          State.Message := GetFunctionReturnMessage(tmp);
+          StateAfterUnlock.ID += 1;
+          StateAfterUnlock.Locked := (tmp < 0);
+          StateAfterUnlock.Message := GetFunctionReturnMessage(tmp);
         end;
       end;
 
@@ -132,7 +133,7 @@
         end;
 
         procedure DoInternalLock;
-          var tmp: HRESULT;
+        var tmp: HRESULT;
         begin
           with soundBuffer^.LockableRegion do
           begin
@@ -144,8 +145,9 @@
               0
             );
 
-            State.Locked := (tmp >= 0);
-            State.Message := GetFunctionReturnMessage(tmp);
+            StateAfterLock.ID += 1;
+            StateAfterLock.Locked := (tmp >= 0);
+            StateAfterLock.Message := GetFunctionReturnMessage(tmp);
           end;
         end;
       begin
@@ -241,8 +243,8 @@
           Cursor.PlayCursor := DEFAULT_CURSOR_POS;
           Cursor.WriteCursor := DEFAULT_CURSOR_POS;
           Cursor.TargetCursor := DEFAULT_CURSOR_POS;
-          State.Locked := false;
-          State.Message := 'NONE';
+          StateAfterLock := default(TLockState);
+          StateAfterUnlock := default(TLockState);
         end;
 
         bufferCreated := DS8.CreateSoundBuffer(bfdesc, soundBuffer.Content, nil) >= 0;
@@ -256,8 +258,8 @@
 
         with soundBuffer^.LockableRegion do
         begin
-          if not State.Locked then
-            raise ELock.Init(@State);
+          if not StateAfterLock.Locked then
+            //raise ELock.Init(@StateAfterLock);
 
           (*LockedRegion1*)
           WriteSamplesTolockedRegion(LockedRegions[0], soundBuffer^.RunningSampleIndex);
@@ -267,8 +269,8 @@
 
           UnlockRegionsWithin(soundBuffer);
 
-          if State.Locked then
-            raise EUnlock.Init(@State);
+          if StateAfterUnLock.Locked then
+            //raise EUnlock.Init(@StateAfterUnLock);
         end;
       end;
 

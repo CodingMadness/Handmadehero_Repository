@@ -21,7 +21,7 @@ interface
 
       ELock = class(Exception)
       private
-        fLockState: TLockState;
+        fLockState: PLockState;
 
         function GetLocked: bool;
         function GetReturnMessage: TCallReturnMessage;
