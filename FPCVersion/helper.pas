@@ -6,10 +6,12 @@ interface
       Classes, windows, SysUtils;
 
     const
-      SENSEFUL_ERROR_LENGTH = 38;
+      RETURN_MESSAGE_LENGTH = 38;
 
     type
-      TCallReturnMessage = String[SENSEFUL_ERROR_LENGTH];
+      TRoutineName = String[6];
+
+      TCallReturnMessage = String[RETURN_MESSAGE_LENGTH];
 
       TLockState = record
         ID: QWORD;
@@ -37,7 +39,7 @@ interface
       EUnlock = class(ELock);
 
      function GetFunctionReturnMessage(const returnCode: HRESULT): TCallReturnMessage;
-     procedure WriteLockState(const currState: PLockState);
+     procedure WriteLockState(const currState: PLockState; const routineName: TRoutineName);
 
 implementation
     {ELock/EUnlock}
@@ -79,11 +81,11 @@ implementation
       msgBuf := nil;
     end;
 
-    procedure WriteLockState(const currState: PLockState);
+    procedure WriteLockState(const currState: PLockState; const routineName: TRoutineName);
     begin
-      writeln('Count of successful function calls until an exception was raised: ', currState^.ID);
-      writeln('Success of the specific function: ', currState^.Locked);
-      writeln('Result message from the call of the respected function: ', currState^.Message);
+      writeln('Count of successful ', routineName, ' calls until an exception was raised: ', currState^.ID);
+      writeln('Success of the ' , '<',routineName, '>', ' function: ', currState^.Locked);
+      writeln('Result message from the call of ', routineName, ' function: ', currState^.Message);
       writeln;
     end;
 

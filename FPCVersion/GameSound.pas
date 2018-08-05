@@ -30,6 +30,8 @@
 
         TSoundVolume = -TSampleInfo.CHANNELVOLUME..TSampleInfo.CHANNELVOLUME;
 
+        TSine = Single;
+
         TSampleChannels = record
           Left, Right: TSoundVolume;
         end;
@@ -62,6 +64,7 @@
 
         TSoundBuffer = record
           RunningSampleIndex: TSampleIndex;
+          WavePosition: Single;
           Playing: BOOL;
           Content: IDirectSoundBuffer;
           LockableRegion: TLockableRegion;
@@ -117,7 +120,7 @@
                                           GetCurrentPosition(@PlayCursor, @WriteCursor) >= 0;
             if positionValid then
             begin
-              TargetCursor := TCursorPosition(TSampleInfo.LATENCYSAMPLEBYTECOUNT + PlayCursor) mod high(TBufferSize);
+              TargetCursor := TCursorPosition((TSampleInfo.LATENCYSAMPLEBYTECOUNT + PlayCursor) mod high(TBufferSize));
               StartByteToLockFrom := (soundBuffer^.RunningSampleIndex * TSampleInfo.SIZE) mod high(TBufferSize);
 
               if StartByteToLockFrom < TargetCursor then
@@ -160,29 +163,20 @@
         DoInternalLock;
       end;
 
-      procedure WriteSamplesTolockedRegion(const lockedRegion: TRegion; var runningSampleIndex: TSampleIndex);
+      procedure WriteSamplesTolockedRegion(const lockedRegion: TRegion; var wavePos: TSine; var runningSampleIndex: TSampleIndex);
       var
         totalSampleCount, SampleIndex: TSampleIndex;
         firstSample: PSampleChannels;
         volume: TSoundVolume;
 
-        function sineVolume: TSoundVolume;
-        var time, sinus: ValReal;
+        function sineVolume: TSoundVolume; inline;
+        var sinus: TSine;
         begin
-          time := TWaveCycle.DURATION * ValReal(runningSampleIndex) / ValReal(TSampleInfo.SAMPLESPERWAVECYCLE);
-          sinus := ValReal(sin(time));
+          sinus := TSine(sin(wavePos));
           result := TSoundVolume(Trunc(sinus * TSampleInfo.CHANNELVOLUME));
+          wavePos += TSine((TWaveCycle.DURATION * 1.0) / TSine(TSampleInfo.SAMPLESPERWAVECYCLE));
         end;
 
-        function squareVolume: TSoundVolume;
-          var relativeSampleIndex: TSampleIndex;
-        begin
-          relativeSampleIndex := (runningSampleIndex div TWaveCycle.HALFWAVEFREQUENCY);
-          if (relativeSampleIndex mod 2) = 0 then
-            result := TSampleInfo.CHANNELVOLUME
-          else
-            result := -TSampleInfo.CHANNELVOLUME;
-        end;
       begin
         if lockedRegion.Size = 0 then exit;
 
@@ -233,6 +227,7 @@
         soundBuffer := default(TSoundBuffer);
         soundBuffer.Playing := false;
         soundBuffer.RunningSampleIndex := 0;
+        soundBuffer.WavePosition := 0.0;
 
         with soundBuffer.LockableRegion do
         begin
@@ -253,23 +248,27 @@
 
       procedure WriteSamplesToSoundBuffer(const soundBuffer: PSoundBuffer);
       begin
-        LockRegionsWithin(soundBuffer);
-
         with soundBuffer^.LockableRegion do
         begin
+          LockRegionsWithin(soundBuffer);
+
+          //WriteLockState(@StateAfterLock, 'Lock');
+
           if not StateAfterLock.Locked then exit;
 
           (*LockedRegion1*)
-          WriteSamplesTolockedRegion(LockedRegions[0], soundBuffer^.RunningSampleIndex);
+          WriteSamplesTolockedRegion(LockedRegions[0], soundBuffer^.WavePosition, soundBuffer^.RunningSampleIndex);
 
           (*LockedRegion2*)
-          WriteSamplesTolockedRegion(LockedRegions[1], soundBuffer^.RunningSampleIndex);
+          WriteSamplesTolockedRegion(LockedRegions[1], soundBuffer^.WavePosition, soundBuffer^.RunningSampleIndex);
 
           UnlockRegionsWithin(soundBuffer);
+
+          //WriteLockState(@StateAfterunlock, 'Unlock');
         end;
       end;
 
-      procedure PlayTheSoundBuffer(const soundBuffer: PSoundBuffer);
+      procedure PlayTheSoundBuffer(const soundBuffer: PSoundBuffer); inline;
       begin
         if not soundBuffer^.Playing then
           soundBuffer^.Playing := soundBuffer^.Content.Play(0, 0, DSBPLAY_LOOPING) >= 0;
