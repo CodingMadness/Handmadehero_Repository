@@ -13,8 +13,8 @@
         ONE_GAMEHWND: HWND;
 
       type
-        TMaxWidth  =  0..MIN_WIDTH;
-        TMaxHeight =  0..MIN_HEIGHT;
+        TMaxWidth  =  MIN_WIDTH..MAX_WIDTH;
+        TMaxHeight =  MIN_HEIGHT..MAX_HEIGHT;
         TWindowArea = 0..(MAX_WIDTH * MAX_HEIGHT);
 
       procedure CreateWindowObject(var toAlloc: PWNDCLASS);
