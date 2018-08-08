@@ -92,19 +92,22 @@ implementation
     procedure PrintLockState(const currState: PLockState; routineName: TRoutineName);
     begin
       routineName := upcase('<' + routineName + '>');
-
-      write('Count of successful ', routineName, ' until DirectSound did not find any further regions it can lock memory: ');
+    //------------------------------------------//
+      write('Count of successful ', routineName);
       TextColor(LightRed);
       writeln('(', currState^.ID, ')');
       TextColor(white);
+    //------------------------------------------//
       write('Did the ', routineName, ' succeed:? ');
       TextColor(LightRed);
       writeln('(', currState^.Locked, ')');
       TextColor(white);
+    //------------------------------------------//
       write('Result Message of ', routineName, ' based on the success of the', routineName ,' after it is finished: ');
       TextColor(LightRed);
       writeln('(', currState^.Message, ')');
       TextColor(white);
+    //------------------------------------------//
       writeln;
     end;
 
