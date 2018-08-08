@@ -14,9 +14,9 @@ interface
       TCallReturnMessage = String[RETURN_MESSAGE_LENGTH];
 
       TLockState = record
-        ID: QWORD;
         Locked: BOOL;
         Message: TCallReturnMessage;
+        SuccessCount, FailureCount: QWORD;
       end;
 
       PLockState = ^TLockState;
@@ -93,9 +93,16 @@ implementation
     begin
       routineName := upcase('<' + routineName + '>');
     //------------------------------------------//
-      write('Count of successful ', routineName);
+      write('Count of successful', routineName, 'calls');
       TextColor(LightRed);
-      writeln('(', currState^.ID, ')');
+      writeln('(', currState^.SuccessCount, ')');
+      TextColor(Green);
+      writeln('..................................................');
+      TextColor(White);
+    //------------------------------------------//
+      write('Count of failed', routineName, 'calls');
+      TextColor(LightRed);
+      writeln('(', currState^.FailureCount, ')');
       TextColor(white);
     //------------------------------------------//
       write('Did the ', routineName, ' succeed:? ');
