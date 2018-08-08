@@ -72,7 +72,7 @@
 
         PSoundBuffer = ^TSoundBuffer;
 
-      function EnableSoundProcessing(const hwnd: HWND): BOOL;
+      function EnableSoundProcessing(const hwnd: HWND): boolean;
       procedure CreateSoundBuffer(var soundBuffer: TSoundBuffer);
       procedure WriteSamplesToSoundBuffer(const soundBuffer: PSoundBuffer);
       procedure PlayTheSoundBuffer(const soundBuffer: PSoundBuffer);
@@ -98,17 +98,19 @@
           end;
         end;
       var
-        tmp: HRESULT;
+        code: HRESULT;
       begin
         with soundBuffer^.LockableRegion do
         begin
-          tmp := soundBuffer^.Content.Unlock(LockedRegions[0].Start, LockedRegions[0].Size, LockedRegions[1].Start, LockedRegions[1].Size);
-          DefineUnlockState(tmp);
+          code := soundBuffer^.Content.Unlock(LockedRegions[0].Start, LockedRegions[0].Size,
+                                              LockedRegions[1].Start, LockedRegions[1].Size);
+          DefineUnlockState(code);
         end;
       end;
 
       procedure LockRegionsWithin(const soundBuffer: PSoundBuffer);
-        function specificRegion: TRegion;
+      {$Region NESTED ROUTINES}
+        function fixRegion: TRegion; inline;
         var first: DWORD = 0;
         begin
           result.Start := LPVOID(@first);
@@ -142,7 +144,7 @@
           end;
         end;
 
-        procedure DefineLockState(const code: HRESULT);
+        procedure DefineLockState(const code: HRESULT); inline;
         begin
           with soundBuffer^.LockableRegion do
           begin
@@ -157,22 +159,22 @@
           end;
         end;
 
-        function DoInternalLock: HRESULT;
+        function DoInternalLock: HRESULT; inline;
         begin
           with soundBuffer^.LockableRegion do
           begin
-           result := soundBuffer^.Content.Lock( (LPDWORD(ToLock.Start))^, ToLock.Size,
-                                              @LockedRegions[0].Start, @LockedRegions[0].Size,
-                                              @LockedRegions[1].Start, @LockedRegions[1].Size, 0
-                                            );
-
+           result := soundBuffer^.Content.Lock(
+                                               (LPDWORD(ToLock.Start))^, ToLock.Size,
+                                                @LockedRegions[0].Start, @LockedRegions[0].Size,
+                                                @LockedRegions[1].Start, @LockedRegions[1].Size, 0
+                                               );
           end;
         end;
-
+      {$EndRegion NESTED ROUTINES}
       var code: HRESULT;
       begin
         if not soundBuffer^.Playing then
-          soundBuffer^.LockableRegion.ToLock := specificRegion
+          soundBuffer^.LockableRegion.ToLock := fixRegion
 
         else
           soundBuffer^.LockableRegion.ToLock := computedRegion;
@@ -216,7 +218,7 @@
 
 
       {PUBLIC}
-      function EnableSoundProcessing(const hwnd: HWND): BOOL;
+      function EnableSoundProcessing(const hwnd: HWND): boolean;
       begin
         result := (DirectSoundCreate8(nil, DS8, nil) >= 0);
         result := result and (Ds8.SetCooperativeLevel(hwnd, DSSCL_PRIORITY) >= 0);
@@ -271,7 +273,6 @@
         begin
           LockRegionsWithin(soundBuffer);
 
-          //if not soundBuffer^.Playing then
           PrintLockState(@StateAfterLock, 'Lock');
 
           if not StateAfterLock.Locked then exit;

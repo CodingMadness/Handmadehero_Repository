@@ -138,9 +138,8 @@
         y := 0;
 
         if EnableSoundProcessing(ONE_GAMEHWND) then
-        begin
           CreateSoundBuffer(ONE_SOUNDBUFFER);
-        end;
+
 
         while RUNNING do
         begin
