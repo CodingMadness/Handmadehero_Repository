@@ -29,8 +29,8 @@ interface
     PPixelBuffer = ^TPixelBuffer;
 
   procedure CreateWindowSizedBuffer(const pixelBuffer: PPixelBuffer; const width: TMaxWidth; const height: TMaxHeight);
-  procedure WritePixelsToBuffer(const pixelBuffer: PPixelBuffer; const xOffset, yOffset: integer);
-  procedure DrawPixelBuffer(const phdc: HDC; const pixelBuffer: PPixelBuffer; const gameWindowRect: PRect);
+  procedure WritePixelsToBuffer(const pixelBuffer: PPixelBuffer; const xOffset, yOffset: integer); inline;
+  procedure DrawPixelBuffer(const phdc: HDC; const pixelBuffer: PPixelBuffer; const gameWindowRect: PRect); inline;
 
   implementation
     {PRIVATE}
@@ -50,8 +50,8 @@ interface
       pixelBuffer^.Height := height;
       pixelBuffer^.Width := width;
       pixelBuffer^.Area := TWindowArea(width * height);
-      pixelBuffer^.TotalByteCount := pixelBuffer^.Area * PIXELSIZE;
-      pixelBuffer^.Content := PPixel(VirtualAlloc(nil, pixelBuffer^.TotalByteCount, MEM_COMMIT, PAGE_READWRITE));
+      pixelBuffer^.TotalByteCount := TByteCount(pixelBuffer^.Area * PIXELSIZE);
+      pixelBuffer^.Content := PPixel(GetMem(pixelBuffer^.TotalByteCount));
     end;
 
     procedure EnableGraphicProcessing(const pixelBuffer: PPixelBuffer;
@@ -66,16 +66,19 @@ interface
       pixelBuffer^.INFO.bmiHeader.biBitCount := 32;
       pixelBuffer^.INFO.bmiHeader.biCompression := BI_RGB;
     end;
+
+    procedure FreeIfNeeded(const pixelBuffer: PPixelBuffer); inline;
+    begin
+     if pixelBuffer^.Content <> nil then
+         dispose(pixelBuffer^.Content);
+    end;
     {PRIVATE}
 
 
     {PUBLIC}
     procedure CreateWindowSizedBuffer(const pixelBuffer: PPixelBuffer; const width: TMaxWidth; const height: TMaxHeight); inline;
     begin
-      if pixelBuffer^.Content <> nil then
-        writeLn('FREED MEMORY SUCCESSFULLY?  ' +
-          BoolToStr(VirtualFree(pixelBuffer^.Content, 0, MEM_DECOMMIT)));
-
+      FreeIfNeeded(pixelBuffer);
       EnableGraphicProcessing(pixelBuffer, width, height);
       FillPixelBuffer(pixelBuffer, width, height);
     end;
@@ -96,6 +99,7 @@ interface
           current^ := CreatePixel((rowNr+xOffset), (columnNr+yOffset), (xOffset+yOffset));
           Inc(current);
         end;
+
         first += pixelBuffer^.Width;
       end;
     end;
