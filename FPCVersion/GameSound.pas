@@ -4,7 +4,7 @@
 
   INTERFACE
       USES
-        Windows, classes, Helper, mmsystem, sysutils, DirectSound;
+        Windows, classes, Helper, mmsystem, sysutils, DirectSound, crt;
 
       const
         DEFAULT_CURSOR_POS = -1;
@@ -63,10 +63,10 @@
         end;
 
         TSoundBuffer = record
-          RunningSampleIndex: TSampleIndex;
-          WavePosition: Single;
           Playing: BOOL;
+          WavePosition: TSine;
           Content: IDirectSoundBuffer;
+          GlobalSampleIndex: TSampleIndex;
           LockableRegion: TLockableRegion;
         end;
 
@@ -121,7 +121,7 @@
             if positionValid then
             begin
               TargetCursor := TCursorPosition((TSampleInfo.LATENCYSAMPLEBYTECOUNT + PlayCursor) mod high(TBufferSize));
-              StartByteToLockFrom := (soundBuffer^.RunningSampleIndex * TSampleInfo.SIZE) mod high(TBufferSize);
+              StartByteToLockFrom := (soundBuffer^.GlobalSampleIndex * TSampleInfo.SIZE) mod high(TBufferSize);
 
               if StartByteToLockFrom < TargetCursor then
                 nrOfBytesToLock := TBufferSize(TargetCursor - StartByteToLockFrom)
@@ -163,7 +163,7 @@
         DoInternalLock;
       end;
 
-      procedure WriteSamplesTolockedRegion(const lockedRegion: TRegion; var wavePos: TSine; var runningSampleIndex: TSampleIndex);
+      procedure WriteSamplesTolockedRegion(const lockedRegion: TRegion; var wavePos: TSine; var globalSampleIndex: TSampleIndex);
       var
         totalSampleCount, SampleIndex: TSampleIndex;
         firstSample: PSampleChannels;
@@ -190,7 +190,7 @@
           firstSample^.Left := volume;
           firstSample^.Right := volume;
           inc(firstSample);
-          inc(runningSampleIndex);
+          inc(globalSampleIndex);
         end;
       end;
       {PRIVATE}
@@ -226,7 +226,7 @@
 
         soundBuffer := default(TSoundBuffer);
         soundBuffer.Playing := false;
-        soundBuffer.RunningSampleIndex := 0;
+        soundBuffer.GlobalSampleIndex := 0;
         soundBuffer.WavePosition := 0.0;
 
         with soundBuffer.LockableRegion do
@@ -252,19 +252,20 @@
         begin
           LockRegionsWithin(soundBuffer);
 
-          //WriteLockState(@StateAfterLock, 'Lock');
+          if not soundBuffer^.Playing then
+            PrintLockState(@StateAfterLock, 'Lock');
 
           if not StateAfterLock.Locked then exit;
 
-          (*LockedRegion1*)
-          WriteSamplesTolockedRegion(LockedRegions[0], soundBuffer^.WavePosition, soundBuffer^.RunningSampleIndex);
+          (*-LockedRegion1-*)
+          WriteSamplesTolockedRegion(LockedRegions[0], soundBuffer^.WavePosition, soundBuffer^.GlobalSampleIndex);
 
-          (*LockedRegion2*)
-          WriteSamplesTolockedRegion(LockedRegions[1], soundBuffer^.WavePosition, soundBuffer^.RunningSampleIndex);
+          (*-LockedRegion2-*)
+          WriteSamplesTolockedRegion(LockedRegions[1], soundBuffer^.WavePosition, soundBuffer^.GlobalSampleIndex);
 
           UnlockRegionsWithin(soundBuffer);
 
-          //WriteLockState(@StateAfterunlock, 'Unlock');
+          (*PrintLockState(@StateAfterunlock, 'Unlock');*)
         end;
       end;
 

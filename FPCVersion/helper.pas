@@ -3,7 +3,7 @@ unit Helper;
 
 interface
     uses
-      Classes, windows, SysUtils;
+      Classes, windows, SysUtils, crt;
 
     const
       RETURN_MESSAGE_LENGTH = 38;
@@ -21,6 +21,7 @@ interface
 
       PLockState = ^TLockState;
 
+      {
       ELock = class(Exception)
       private
         fLockState: PLockState;
@@ -37,11 +38,13 @@ interface
       end;
 
       EUnlock = class(ELock);
+      }
 
      function GetFunctionReturnMessage(const returnCode: HRESULT): TCallReturnMessage;
-     procedure WriteLockState(const currState: PLockState; const routineName: TRoutineName);
+     procedure PrintLockState(const currState: PLockState; routineName: TRoutineName);
 
 implementation
+    {
     {ELock/EUnlock}
     constructor ELock.Init(const currState: PLockState);
     begin
@@ -63,6 +66,7 @@ implementation
       result := fLockState^.ID;
     end;
     {ELock/EUnlock}
+    }
 
     function GetFunctionReturnMessage(const returnCode: HRESULT): TCallReturnMessage;
     var
@@ -70,22 +74,37 @@ implementation
       currLang: DWORD;
       msgBuf: LPSTR;
       hMem: HLOCAL;
+      tmpCode: DWORD;
     begin
       msgBuf := nil;
       bufferFlags := DWORD(FORMAT_MESSAGE_ALLOCATE_BUFFER or FORMAT_MESSAGE_FROM_SYSTEM or FORMAT_MESSAGE_IGNORE_INSERTS);
-      currLang := DWORD(MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT));
-      FormatMessageA(bufferFlags, nil, DWORD(returnCode), currLang, LPSTR(@msgBuf), 0, nil);  //range check error
+      currLang    := DWORD(MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT));
+      tmpCode     := DWORD(returnCode);
+      msgBuf      := LPSTR(@msgBuf);
+
+      FormatMessageA(bufferFlags, nil, tmpCode, currLang, msgBuf, 0, nil);  //range check error
       result := TCallReturnMessage(msgBuf);
       hMem := PQWord(@msgBuf)^;
       LocalFree(hMem);
       msgBuf := nil;
     end;
 
-    procedure WriteLockState(const currState: PLockState; const routineName: TRoutineName);
+    procedure PrintLockState(const currState: PLockState; routineName: TRoutineName);
     begin
-      writeln('Count of successful ', routineName, ' calls until an exception was raised: ', currState^.ID);
-      writeln('Success of the ' , '<',routineName, '>', ' function: ', currState^.Locked);
-      writeln('Result message from the call of ', routineName, ' function: ', currState^.Message);
+      routineName := upcase('<' + routineName + '>');
+
+      write('Count of successful ', routineName, ' until DirectSound did not find any further regions it can lock memory: ');
+      TextColor(LightRed);
+      writeln('(', currState^.ID, ')');
+      TextColor(white);
+      write('Did the ', routineName, ' succeed:? ');
+      TextColor(LightRed);
+      writeln('(', currState^.Locked, ')');
+      TextColor(white);
+      write('Result Message of ', routineName, ' based on the success of the', routineName ,' after it is finished: ');
+      TextColor(LightRed);
+      writeln('(', currState^.Message, ')');
+      TextColor(white);
       writeln;
     end;
 
