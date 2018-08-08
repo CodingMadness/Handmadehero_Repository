@@ -271,6 +271,7 @@
         begin
           LockRegionsWithin(soundBuffer);
 
+          //if not soundBuffer^.Playing then
           PrintLockState(@StateAfterLock, 'Lock');
 
           if not StateAfterLock.Locked then exit;

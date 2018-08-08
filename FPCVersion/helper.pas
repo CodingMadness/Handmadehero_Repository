@@ -96,8 +96,6 @@ implementation
       write('Count of successful', routineName, 'calls');
       TextColor(LightRed);
       writeln('(', currState^.SuccessCount, ')');
-      TextColor(Green);
-      writeln('..................................................');
       TextColor(White);
     //------------------------------------------//
       write('Count of failed', routineName, 'calls');
@@ -113,9 +111,10 @@ implementation
       write('Result Message of ', routineName, ' based on the success of the', routineName ,' after it is finished: ');
       TextColor(LightRed);
       writeln('(', currState^.Message, ')');
-      TextColor(white);
     //------------------------------------------//
-      writeln;
+      TextColor(Green);
+      writeln('_________________________________________________________________________________________________________________________');
+      TextColor(White);
     end;
 
 end.
