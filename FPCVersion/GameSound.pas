@@ -83,20 +83,27 @@
 
       {PRIVATE}
       procedure UnlockRegionsWithin(const soundBuffer: PSoundBuffer);
+        procedure DefineUnlockState(const code: HRESULT);
+        begin
+          with soundBuffer^.LockableRegion do
+          begin
+            StateAfterLock.Locked := (code < 0);
+
+            if StateAfterLock.Locked then
+              StateAfterLock.FailureCount += 1
+            else
+              StateAfterLock.SuccessCount += 1;
+
+            StateAfterLock.Message := GetFunctionReturnMessage(code);
+          end;
+        end;
       var
         tmp: HRESULT;
       begin
         with soundBuffer^.LockableRegion do
         begin
-          tmp := soundBuffer^.Content.Unlock
-          (
-            LockedRegions[0].Start, LockedRegions[0].Size,
-            LockedRegions[1].Start, LockedRegions[1].Size
-          );
-
-          StateAfterUnlock.ID += 1;
-          StateAfterUnlock.Locked := (tmp < 0);
-          StateAfterUnlock.Message := GetFunctionReturnMessage(tmp);
+          tmp := soundBuffer^.Content.Unlock(LockedRegions[0].Start, LockedRegions[0].Size, LockedRegions[1].Start, LockedRegions[1].Size);
+          DefineUnlockState(tmp);
         end;
       end;
 
@@ -135,24 +142,34 @@
           end;
         end;
 
-        procedure DoInternalLock;
-        var tmp: HRESULT;
+        procedure DefineLockState(const code: HRESULT);
         begin
           with soundBuffer^.LockableRegion do
           begin
-            tmp := soundBuffer^.Content.Lock
-            (
-              (LPDWORD(ToLock.Start))^, ToLock.Size,
-              @LockedRegions[0].Start, @LockedRegions[0].Size,
-              @LockedRegions[1].Start, @LockedRegions[1].Size,
-              0
-            );
+            StateAfterLock.Locked := (code >= 0);
 
-            StateAfterLock.ID += 1;
-            StateAfterLock.Locked := (tmp >= 0);
-            StateAfterLock.Message := GetFunctionReturnMessage(tmp);
+            if StateAfterLock.Locked then
+              StateAfterLock.SuccessCount += 1
+            else
+              StateAfterLock.FailureCount += 1;
+
+            StateAfterLock.Message := GetFunctionReturnMessage(code);
           end;
         end;
+
+        function DoInternalLock: HRESULT;
+        begin
+          with soundBuffer^.LockableRegion do
+          begin
+           result := soundBuffer^.Content.Lock( (LPDWORD(ToLock.Start))^, ToLock.Size,
+                                              @LockedRegions[0].Start, @LockedRegions[0].Size,
+                                              @LockedRegions[1].Start, @LockedRegions[1].Size, 0
+                                            );
+
+          end;
+        end;
+
+      var code: HRESULT;
       begin
         if not soundBuffer^.Playing then
           soundBuffer^.LockableRegion.ToLock := specificRegion
@@ -160,7 +177,9 @@
         else
           soundBuffer^.LockableRegion.ToLock := computedRegion;
 
-        DoInternalLock;
+        code := DoInternalLock;
+
+        DefineLockState(code);
       end;
 
       procedure WriteSamplesTolockedRegion(const lockedRegion: TRegion; var wavePos: TSine; var globalSampleIndex: TSampleIndex);
