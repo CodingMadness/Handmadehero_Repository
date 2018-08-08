@@ -12,8 +12,7 @@
       TYPE
         TWaveCycle = record
           const PI = 3.14159265358979323846;
-          const WAVEFREQUENCY = 256; //1-HZ=256
-          const HALFWAVEFREQUENCY = WAVEFREQUENCY div 2; //0.5 HZ = 128
+          const WAVEFREQUENCY = 128 shl 2; //1HZ=256
           const DURATION = 2.0 * PI;
         end;
 
@@ -117,7 +116,7 @@
           result.Size := TSampleInfo.LATENCYSAMPLECOUNT;
         end;
 
-        function computedRegion: TRegion;
+        function computedRegion: TRegion; inline;
         var
           positionValid: boolean;
           StartByteToLockFrom: TBufferSize;
@@ -273,7 +272,7 @@
         begin
           LockRegionsWithin(soundBuffer);
 
-          PrintLockState(@StateAfterLock, 'Lock');
+          //PrintLockState(@StateAfterLock, 'Lock');
 
           if not StateAfterLock.Locked then exit;
 
