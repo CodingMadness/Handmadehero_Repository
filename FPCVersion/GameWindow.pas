@@ -18,7 +18,7 @@
         TWindowArea = 0..(MAX_WIDTH * MAX_HEIGHT);
 
       procedure CreateWindowObject(var toAlloc: PWNDCLASS);
-      function RegisterWindow(const wnd: PWNDCLASS): Bool;
+      function RegisterWindow(const wnd: PWNDCLASS): boolean;
       function DrawWindow(const wndObj: PWNDCLASS): HWND;
       procedure ProceedWin32MessagesFromAppQueue;
       procedure StartGameLoop;
@@ -102,7 +102,7 @@
         toAlloc^.lpszMenuName := 'Handmade Hero';
       end;
 
-      function RegisterWindow(const wnd: PWNDCLASS): Bool;
+      function RegisterWindow(const wnd: PWNDCLASS): boolean;
       begin
         Result := RegisterClass(wnd^) <> 0;
       end;

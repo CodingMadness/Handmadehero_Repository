@@ -4,7 +4,7 @@
 
   INTERFACE
       USES
-        Windows, classes, Helper, mmsystem, sysutils, DirectSound, crt;
+        Windows, Helper, mmsystem, sysutils, classes, DirectSound, crt;
 
       const
         DEFAULT_CURSOR_POS = -1;
@@ -86,14 +86,15 @@
         begin
           with soundBuffer^.LockableRegion do
           begin
-            StateAfterLock.Locked := (code < 0);
+            StateAfterUnlock.FunctionName := '<UNLOCk>';
+            StateAfterUnlock.Locked := (code < 0);
 
-            if StateAfterLock.Locked then
-              StateAfterLock.FailureCount += 1
+            if StateAfterUnlock.Locked then
+              StateAfterUnlock.FailureCount += 1
             else
-              StateAfterLock.SuccessCount += 1;
+              StateAfterUnlock.SuccessCount += 1;
 
-            StateAfterLock.Message := GetFunctionReturnMessage(code);
+            StateAfterUnlock.Message := GetFunctionReturnMessage(code);
           end;
         end;
       var
@@ -147,6 +148,7 @@
         begin
           with soundBuffer^.LockableRegion do
           begin
+            StateAfterLock.FunctionName := '<LOCK>';
             StateAfterLock.Locked := (code >= 0);
 
             if StateAfterLock.Locked then
@@ -272,7 +274,9 @@
         begin
           LockRegionsWithin(soundBuffer);
 
-          //PrintLockState(@StateAfterLock, 'Lock');
+          PrintLockState(@StateAfterLock);
+
+          TThread.Sleep(1500);
 
           if not StateAfterLock.Locked then exit;
 
@@ -284,7 +288,7 @@
 
           UnlockRegionsWithin(soundBuffer);
 
-          (*PrintLockState(@StateAfterunlock, 'Unlock');*)
+          //PrintLockState(@StateAfterunlock);
         end;
       end;
 

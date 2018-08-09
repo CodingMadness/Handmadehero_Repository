@@ -6,11 +6,12 @@ interface
       Classes, windows, SysUtils, crt;
 
     type
-      TRoutineName = String[6];
+      TFunctioName = String[10];
 
       TCallReturnMessage = String[38];
 
       TLockState = record
+        FunctionName: TFunctioName;
         Locked: boolean;
         Message: TCallReturnMessage;
         SuccessCount, FailureCount: QWORD;
@@ -38,7 +39,7 @@ interface
       }
 
      function GetFunctionReturnMessage(const code: HRESULT): TCallReturnMessage;
-     procedure PrintLockState(const currState: PLockState; routineName: TRoutineName);
+     procedure PrintLockState(const currState: PLockState);
 
 implementation
     {
@@ -85,26 +86,25 @@ implementation
       msgBuf := nil;
     end;
 
-    procedure PrintLockState(const currState: PLockState; routineName: TRoutineName);
+    procedure PrintLockState(const currState: PLockState);
     begin
-      routineName := upcase('<' + routineName + '>');
     //------------------------------------------//
-      write('Count of successful ', routineName, ' calls');
+      write('Count of successful ', currState^.functionName, ' calls');
       TextColor(LightRed);
       writeln('(', currState^.SuccessCount, ')');
       TextColor(White);
     //------------------------------------------//
-      write('Count of failed ', routineName, ' calls');
+      write('Count of failed ', currState^.functionName, ' calls');
       TextColor(LightRed);
       writeln('(', currState^.FailureCount, ')');
       TextColor(white);
     //------------------------------------------//
-      write('Did the ', routineName, ' succeed:? ');
+      write('Did the ', currState^.functionName, ' succeed:? ');
       TextColor(LightRed);
       writeln('(', currState^.Locked, ')');
       TextColor(white);
     //------------------------------------------//
-      write('Result Message of ', routineName, ' based on the success of the ', routineName ,' after it is finished: ');
+      write('Result Message of ', currState^.functionName, ' based on the success of the ', currState^.functionName ,' after it is finished: ');
       TextColor(LightRed);
       writeln('(', currState^.Message, ')');
     //------------------------------------------//
