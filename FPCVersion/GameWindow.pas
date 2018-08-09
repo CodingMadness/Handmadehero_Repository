@@ -17,9 +17,9 @@
         TMaxHeight =  MIN_HEIGHT..MAX_HEIGHT;
         TWindowArea = 0..(MAX_WIDTH * MAX_HEIGHT);
 
-      procedure CreateWindowObject(var toAlloc: PWNDCLASS);
-      function RegisterWindow(const wnd: PWNDCLASS): boolean;
-      function DrawWindow(const wndObj: PWNDCLASS): HWND;
+      procedure CreateWindowObject(var toAlloc: PWNDCLASSA);
+      function RegisterWindow(const wnd: PWNDCLASSA): boolean;
+      function DrawWindow(const wndObj: PWNDCLASSA): HWND;
       procedure ProceedWin32MessagesFromAppQueue;
       procedure StartGameLoop;
 
@@ -27,7 +27,8 @@
       uses
         GameInput,
         GameSound,
-        GameGraphics;
+        GameGraphics,
+        classes;
 
       var
         RUNNING: boolean;
@@ -91,10 +92,10 @@
           end;
         end;
 
-      procedure CreateWindowObject(var toAlloc: PWNDCLASS);
+      procedure CreateWindowObject(var toAlloc: PWNDCLASSA);
       begin
-        toAlloc := PWNDCLASS(GetMem(sizeof(WNDCLASS)));
-        toAlloc^ := default(WNDCLASS);
+        toAlloc := PWNDCLASSA(GetMem(sizeof(WNDCLASSA)));
+        toAlloc^ := default(WNDCLASSA);
         toAlloc^.style := CS_VREDRAW or CS_HREDRAW or CS_OWNDC;
         toAlloc^.hInstance := GetModuleHandle(nil);
         toAlloc^.lpfnWndProc := WNDPROC(@MainWindowCallback);
@@ -102,14 +103,14 @@
         toAlloc^.lpszMenuName := 'Handmade Hero';
       end;
 
-      function RegisterWindow(const wnd: PWNDCLASS): boolean;
+      function RegisterWindow(const wnd: PWNDCLASSA): boolean;
       begin
-        Result := RegisterClass(wnd^) <> 0;
+        Result := RegisterClassA(wnd^) <> 0;
       end;
 
-      function DrawWindow(const wndObj: PWNDCLASS): HWND;
+      function DrawWindow(const wndObj: PWNDCLASSA): HWND;
       begin
-        Result := CreateWindowEx(0, wndObj^.lpszClassName, wndObj^.lpszMenuName,
+        Result := CreateWindowExA(0, wndObj^.lpszClassName, wndObj^.lpszMenuName,
                                     WS_OVERLAPPEDWINDOW or WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT,
                                     CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, wndObj^.hInstance, nil);
       end;
@@ -147,7 +148,8 @@
 
           {......................................}
           WriteSamplesToSoundBuffer(@ONE_SOUNDBUFFER);
-          PlayTheSoundBuffer(@ONE_SOUNDBUFFER);
+          //PlayTheSoundBuffer(@ONE_SOUNDBUFFER);
+
           {......................................}
 
           {......................................}

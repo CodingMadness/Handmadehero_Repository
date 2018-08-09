@@ -89,23 +89,39 @@ implementation
     procedure PrintLockState(const currState: PLockState);
     begin
     //------------------------------------------//
-      write('Count of successful ', currState^.functionName, ' calls');
-      TextColor(LightRed);
-      writeln('(', currState^.SuccessCount, ')');
-      TextColor(White);
-    //------------------------------------------//
-      write('Count of failed ', currState^.functionName, ' calls');
-      TextColor(LightRed);
-      writeln('(', currState^.FailureCount, ')');
+      write('This is number: ');
+      TextColor(LightGreen);
+      write('(', currState^.SuccessCount, ') ');
       TextColor(white);
+      write('of successful: ', currState^.functionName, ' calls');
+      TextColor(white);
+      writeln;
+    //------------------------------------------//
+      write('This is number: ');
+      TextColor(LightRed);
+      write('(', currState^.FailureCount, ') ');
+      TextColor(white);
+      write('of failed: ', currState^.functionName, ' calls');
+      TextColor(white);
+      writeln;
     //------------------------------------------//
       write('Did the ', currState^.functionName, ' succeed:? ');
-      TextColor(LightRed);
+
+      if currState^.Locked then
+        TextColor(LightGreen)
+      else
+        TextColor(LightGreen);
+
       writeln('(', currState^.Locked, ')');
       TextColor(white);
     //------------------------------------------//
       write('Result Message of ', currState^.functionName, ' based on the success of the ', currState^.functionName ,' after it is finished: ');
-      TextColor(LightRed);
+
+      if currState^.Locked then
+        TextColor(LightGreen)
+      else
+        TextColor(LightGreen);
+
       writeln('(', currState^.Message, ')');
     //------------------------------------------//
       TextColor(Green);

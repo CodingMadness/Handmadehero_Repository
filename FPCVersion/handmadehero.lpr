@@ -8,7 +8,7 @@ uses
   GameWindow, Helper;
 
 var
-  pwnd: PWNDCLASS = nil;
+  pwnd: PWNDCLASSA = nil;
 
 begin
   CreateWindowObject(pwnd);

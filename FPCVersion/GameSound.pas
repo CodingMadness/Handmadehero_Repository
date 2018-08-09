@@ -4,7 +4,7 @@
 
   INTERFACE
       USES
-        Windows, Helper, mmsystem, sysutils, classes, DirectSound, crt;
+        Windows, Helper, mmsystem, sysutils, DirectSound;
 
       const
         DEFAULT_CURSOR_POS = -1;
@@ -39,6 +39,8 @@
 
         TSampleIndex =  0..(TSampleInfo.SAMPLESPERSECOND-1);
 
+        TInfiniteSampleIndex = QWORD;
+
         TBufferSize  =  0..(TSampleInfo.SAMPLESPERSECOND * TSampleInfo.SIZE);
 
         TCursorPosition = DEFAULT_CURSOR_POS..high(DWORD);
@@ -65,7 +67,7 @@
           Playing: BOOL;
           WavePosition: TSine;
           Content: IDirectSoundBuffer;
-          GlobalSampleIndex: TSampleIndex;
+          GlobalSampleIndex: TInfiniteSampleIndex;
           LockableRegion: TLockableRegion;
         end;
 
@@ -185,7 +187,7 @@
         DefineLockState(code);
       end;
 
-      procedure WriteSamplesTolockedRegion(const lockedRegion: TRegion; var wavePos: TSine; var globalSampleIndex: TSampleIndex);
+      procedure WriteSamplesTolockedRegion(const lockedRegion: TRegion; var wavePos: TSine; var globalSampleIndex: TInfiniteSampleIndex);
       var
         totalSampleCount, SampleIndex: TSampleIndex;
         firstSample: PSampleChannels;
@@ -275,8 +277,6 @@
           LockRegionsWithin(soundBuffer);
 
           PrintLockState(@StateAfterLock);
-
-          TThread.Sleep(1500);
 
           if not StateAfterLock.Locked then exit;
 
