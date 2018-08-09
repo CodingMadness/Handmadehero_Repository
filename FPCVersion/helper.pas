@@ -6,18 +6,20 @@ interface
       Classes, windows, SysUtils, crt;
 
     type
-      TFunctioName = String[10];
+      TFunctioName = String[8];
 
       TCallReturnMessage = String[38];
 
-      TLockState = record
+      TLockState = (INITIAL=-1, LOCKED=0, UNLOCKED=1);        //added..
+
+      TLockInfo = record
         FunctionName: TFunctioName;
-        Locked: boolean;
+        State: TLockState;               //changed to..
         Message: TCallReturnMessage;
         SuccessCount, FailureCount: QWORD;
       end;
 
-      PLockState = ^TLockState;
+      PLockInfo = ^TLockInfo;
 
       {
       ELock = class(Exception)
@@ -39,12 +41,12 @@ interface
       }
 
      function GetFunctionReturnMessage(const code: HRESULT): TCallReturnMessage;
-     procedure PrintLockState(const currState: PLockState);
+     procedure PrintLockState(const currState: PLockInfo);
 
 implementation
     {
       {ELock/EUnlock}
-      constructor ELock.Init(const currState: PLockState);
+      constructor ELock.Init(const currState: PLockInfo);
       begin
         fLockState := currState;
       end;
@@ -86,7 +88,16 @@ implementation
       msgBuf := nil;
     end;
 
-    procedure PrintLockState(const currState: PLockState);
+    procedure WriteEmptyLines(const newLines: DWORD);
+    var start: DWORD;
+    begin
+      for start := 0 to newLines do
+        writeln;
+    end;
+
+    procedure PrintLockState(const currState: PLockInfo);
+    var
+      suceedCall: boolean;
     begin
     //------------------------------------------//
       write('This is number: ');
@@ -98,7 +109,7 @@ implementation
       writeln;
     //------------------------------------------//
       write('This is number: ');
-      TextColor(LightRed);
+      TextColor(Red);
       write('(', currState^.FailureCount, ') ');
       TextColor(white);
       write('of failed: ', currState^.functionName, ' calls');
@@ -106,26 +117,25 @@ implementation
       writeln;
     //------------------------------------------//
       write('Did the ', currState^.functionName, ' succeed:? ');
+      suceedCall := currState^.State <> INITIAL;
+      if suceedCall then
+        TextColor(Green)
+      else if currState^.State = INITIAL then
+        TextColor(Red);
 
-      if currState^.Locked then
-        TextColor(LightGreen)
-      else
-        TextColor(LightGreen);
-
-      writeln('(', currState^.Locked, ')');
+      writeln('(', suceedCall, ')');
       TextColor(white);
     //------------------------------------------//
-      write('Result Message of ', currState^.functionName, ' based on the success of the ', currState^.functionName ,' after it is finished: ');
+      write('Result Message of  ', currState^.functionName, ': ');
 
-      if currState^.Locked then
-        TextColor(LightGreen)
-      else
-        TextColor(LightGreen);
+      if currState^.State <> INITIAL then
+        TextColor(Green)
+      else if currState^.State = INITIAL then
+        TextColor(Red);
 
       writeln('(', currState^.Message, ')');
     //------------------------------------------//
-      TextColor(Green);
-      writeln('_________________________________________________________________________________________________________________________');
+      WriteEmptyLines(3);
       TextColor(White);
     end;
 
