@@ -12,7 +12,7 @@
       TYPE
         TWaveCycle = record
           const PI = 3.14159265358979323846;
-          const WAVEFREQUENCY = 128 shl 2; //1HZ=256
+          const WAVEFREQUENCY = 256;//1HZ=256
           const DURATION = 2.0 * PI;
         end;
 
@@ -56,11 +56,11 @@
           TargetCursor: TCursorPosition;
         end;
 
-        TLockableRegion = record
+        TManipulatableRegion = record
          ToLock: TRegion;
-         LockedRegions: array[0..1] of TRegion;
+         ManipulatedRegions: array[0..1] of TRegion;
          Cursor: TSystemCursor;
-         StateAfterLock, StateAfterUnlock: TLockState;
+         ManipulatedRegionState: TManipulatedRegionState;
         end;
 
         TSoundBuffer = record
@@ -68,7 +68,7 @@
           WavePosition: TSine;
           Content: IDirectSoundBuffer;
           GlobalSampleIndex: TInfiniteSampleIndex;
-          LockableRegion: TLockableRegion;
+          ManipulatableRegion: TManipulatableRegion;
         end;
 
         PSoundBuffer = ^TSoundBuffer;
@@ -84,29 +84,29 @@
 
       {PRIVATE}
       procedure UnlockRegionsWithin(const soundBuffer: PSoundBuffer);
-        procedure DefineUnlockState(const code: HRESULT);
+        procedure IndentifyUnlockInfo(const code: HRESULT);
         begin
-          with soundBuffer^.LockableRegion do
+          with soundBuffer^.ManipulatableRegion.ManipulatedRegionState.UnlockState do
           begin
-            StateAfterUnlock.FunctionName := '<UNLOCk>';
-            StateAfterUnlock.Locked := (code < 0);
+            infoAfterUnlock.Number += 1;
+            infoAfterUnlock.CallSuceeded := (code >= 0);
 
-            if StateAfterUnlock.Locked then
-              StateAfterUnlock.FailureCount += 1
+            if infoAfterUnlock.CallSuceeded then
+              SuceededUntilNow += 1
             else
-              StateAfterUnlock.SuccessCount += 1;
+              FailedUntilNow += 1;
 
-            StateAfterUnlock.Message := GetFunctionReturnMessage(code);
+            infoAfterUnlock.ReturnMessage := GetFunctionReturnMessage(code);
           end;
         end;
       var
         code: HRESULT;
       begin
-        with soundBuffer^.LockableRegion do
+        with soundBuffer^.ManipulatableRegion do
         begin
-          code := soundBuffer^.Content.Unlock(LockedRegions[0].Start, LockedRegions[0].Size,
-                                              LockedRegions[1].Start, LockedRegions[1].Size);
-          DefineUnlockState(code);
+          code := soundBuffer^.Content.Unlock(ManipulatedRegions[0].Start, ManipulatedRegions[0].Size,
+                                              ManipulatedRegions[1].Start, ManipulatedRegions[1].Size);
+          IndentifyUnlockInfo(code);
         end;
       end;
 
@@ -125,7 +125,7 @@
           StartByteToLockFrom: TBufferSize;
           nrOfBytesToLock: TBufferSize = 0;
         begin
-          with soundBuffer^.LockableRegion.Cursor do
+          with soundBuffer^.ManipulatableRegion.Cursor do
           begin
             positionValid := soundBuffer^.Content.
                                           GetCurrentPosition(@PlayCursor, @WriteCursor) >= 0;
@@ -146,45 +146,39 @@
           end;
         end;
 
-        procedure DefineLockState(const code: HRESULT); inline;
+        procedure IndentifyLockInfo(const code: HRESULT); inline;
         begin
-          with soundBuffer^.LockableRegion do
+         with soundBuffer^.ManipulatableRegion.ManipulatedRegionState.LockState do
           begin
-            StateAfterLock.FunctionName := '<LOCK>';
-            StateAfterLock.Locked := (code >= 0);
+            infoAfterLock.Number += 1;
+            infoAfterLock.CallSuceeded := (code >= 0);
 
-            if StateAfterLock.Locked then
-              StateAfterLock.SuccessCount += 1
+            if infoAfterLock.CallSuceeded then
+              SuceededUntilNow += 1
             else
-              StateAfterLock.FailureCount += 1;
+              FailedUntilNow += 1;
 
-            StateAfterLock.Message := GetFunctionReturnMessage(code);
+            infoAfterLock.ReturnMessage := GetFunctionReturnMessage(code);
           end;
         end;
 
-        function DoInternalLock: HRESULT; inline;
+        function internalLock: HRESULT; inline;
         begin
-          with soundBuffer^.LockableRegion do
+          with soundBuffer^.ManipulatableRegion do
           begin
            result := soundBuffer^.Content.Lock(
                                                (LPDWORD(ToLock.Start))^, ToLock.Size,
-                                                @LockedRegions[0].Start, @LockedRegions[0].Size,
-                                                @LockedRegions[1].Start, @LockedRegions[1].Size, 0
+                                                @ManipulatedRegions[0].Start, @ManipulatedRegions[0].Size,
+                                                @ManipulatedRegions[1].Start, @ManipulatedRegions[1].Size, 0
                                                );
           end;
         end;
       {$EndRegion NESTED ROUTINES}
       var code: HRESULT;
       begin
-        if not soundBuffer^.Playing then
-          soundBuffer^.LockableRegion.ToLock := fixRegion
-
-        else
-          soundBuffer^.LockableRegion.ToLock := computedRegion;
-
-        code := DoInternalLock;
-
-        DefineLockState(code);
+        soundBuffer^.ManipulatableRegion.ToLock := computedRegion;
+        code := internalLock;
+        IndentifyLockInfo(code);
       end;
 
       procedure WriteSamplesTolockedRegion(const lockedRegion: TRegion; var wavePos: TSine; var globalSampleIndex: TInfiniteSampleIndex);
@@ -233,7 +227,7 @@
         bfdesc : DSBUFFERDESC;
         wFormat: WAVEFORMATEX;
       begin
-        wFormat := default(WAVEFORMATEX);
+        wFormat := Default(WAVEFORMATEX);
         wFormat.cbSize := 0;
         wFormat.wFormatTag := WAVE_FORMAT_PCM;
         wFormat.nChannels := TSampleInfo.CHANNELCOUNT;
@@ -242,27 +236,38 @@
         wFormat.nBlockAlign := Word((TSampleInfo.CHANNELCOUNT * TSampleInfo.SAMPLEBITS) div 8);
         wFormat.nAvgBytesPerSec := WFORMAT.nBlockAlign * WFORMAT.nSamplesPerSec;
 
-        bfdesc := default(DSBUFFERDESC);
+        bfdesc := Default(DSBUFFERDESC);
         bfdesc.dwSize := sizeOf(DSBUFFERDESC);
         bfdesc.dwBufferBytes := high(TBufferSize);
         bfdesc.dwFlags := 0;
         bfdesc.lpwfxFormat:= @wFormat;
 
-        soundBuffer := default(TSoundBuffer);
+        soundBuffer := Default(TSoundBuffer);
         soundBuffer.Playing := false;
         soundBuffer.GlobalSampleIndex := 0;
         soundBuffer.WavePosition := 0.0;
 
-        with soundBuffer.LockableRegion do
+        with soundBuffer.ManipulatableRegion do
         begin
-          ToLock := default(TRegion);
-          LockedRegions[0] := default(TRegion);
-          LockedRegions[1] := default(TRegion);
+          ToLock := Default(TRegion);
+          ManipulatedRegions[0] := Default(TRegion);
+          ManipulatedRegions[1] := Default(TRegion);
           Cursor.PlayCursor := DEFAULT_CURSOR_POS;
           Cursor.WriteCursor := DEFAULT_CURSOR_POS;
           Cursor.TargetCursor := DEFAULT_CURSOR_POS;
-          StateAfterLock := default(TLockState);
-          StateAfterUnlock := default(TLockState);
+
+          with soundBuffer.ManipulatableRegion.ManipulatedRegionState do
+          begin
+           LockState.infoAfterLock := Default(TAfterCallData);
+           LockState.infoAfterLock.CallSuceeded := false;
+           LockState.infoAfterLock.FunctionName := '<LOCK>';
+           LockState.infoAfterLock.Number := 0;
+
+           UnlockState.infoAfterUnlock := Default(TAfterCallData);
+           UnlockState.infoAfterUnlock.CallSuceeded := false;
+           UnlockState.infoAfterUnlock.FunctionName := '<UNLOCK>';
+           UnlockState.infoAfterUnlock.Number := 0;
+          end;
         end;
 
         bufferCreated := DS8.CreateSoundBuffer(bfdesc, soundBuffer.Content, nil) >= 0;
@@ -271,24 +276,29 @@
       end;
 
       procedure WriteSamplesToSoundBuffer(const soundBuffer: PSoundBuffer);
+      var state: string;
       begin
-        with soundBuffer^.LockableRegion do
+        with soundBuffer^.ManipulatableRegion do
         begin
-          LockRegionsWithin(soundBuffer);
+          with soundBuffer^.ManipulatableRegion.ManipulatedRegionState do
+          begin
+            LockRegionsWithin(soundBuffer);
 
-          PrintLockState(@StateAfterLock);
+            if not soundBuffer^.Playing then
+              PrintLockState(@LockState);
 
-          if not StateAfterLock.Locked then exit;
+            if not LockState.infoAfterLock.CallSuceeded then exit;
 
-          (*-LockedRegion1-*)
-          WriteSamplesTolockedRegion(LockedRegions[0], soundBuffer^.WavePosition, soundBuffer^.GlobalSampleIndex);
+            (*-LockedRegion1-*)
+            WriteSamplesTolockedRegion(ManipulatedRegions[0], soundBuffer^.WavePosition, soundBuffer^.GlobalSampleIndex);
 
-          (*-LockedRegion2-*)
-          WriteSamplesTolockedRegion(LockedRegions[1], soundBuffer^.WavePosition, soundBuffer^.GlobalSampleIndex);
+            (*-LockedRegion2-*)
+            WriteSamplesTolockedRegion(ManipulatedRegions[1], soundBuffer^.WavePosition, soundBuffer^.GlobalSampleIndex);
 
-          UnlockRegionsWithin(soundBuffer);
+            UnlockRegionsWithin(soundBuffer);
 
-          //PrintLockState(@StateAfterunlock);
+            //Print(@UnlockState);
+          end;
         end;
       end;
 

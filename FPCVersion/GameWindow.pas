@@ -148,7 +148,7 @@
 
           {......................................}
           WriteSamplesToSoundBuffer(@ONE_SOUNDBUFFER);
-          //PlayTheSoundBuffer(@ONE_SOUNDBUFFER);
+          PlayTheSoundBuffer(@ONE_SOUNDBUFFER);
 
           {......................................}
 

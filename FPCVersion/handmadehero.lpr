@@ -5,7 +5,8 @@ program handmadehero;
 uses
   SysUtils,
   Windows,
-  GameWindow, Helper;
+  GameWindow,
+  Helper;
 
 var
   pwnd: PWNDCLASSA = nil;
