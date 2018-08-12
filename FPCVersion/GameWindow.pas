@@ -135,6 +135,7 @@
         x, y: integer;
         lastCounter, endCounter, timeElapsed : TLargeInteger;
         timeElapsedInMS, millisecPerFrame: TLargeInteger;
+        fps: TLargeInteger;
       begin
         RUNNING := True;
         x := 0;
@@ -171,9 +172,14 @@
 
           timeElapsed := endCounter - lastCounter;
           timeElapsedInMS := (1000*timeElapsed);
+
           millisecPerFrame := timeElapsedInMS div ClocksPerSecond;
 
-          writeLn(StdErr, 'Milliseconds/Frame: ', millisecPerFrame);
+          fps := ClocksPerSecond div timeElapsed;
+
+          //rewrite(StdErr);
+          writeln(StdErr, 'Milliseconds/Frame: ', millisecPerFrame, ' ||| FPS:  ', fps);
+          writeln;
 
           lastCounter := endCounter;
           {......................................}
