@@ -134,12 +134,16 @@
       var
         x, y: integer;
         lastCounter, endCounter, timeElapsed : TLargeInteger;
-        timeElapsedInMS, millisecPerFrame: TLargeInteger;
+        millisecPerFrame: TLargeInteger;
         fps: TLargeInteger;
+
+        lastCycleCount, endCycleCount, cyclesElapsed,megaCyclesElapsed: QWORD;
       begin
         RUNNING := True;
         x := 0;
         y := 0;
+        lastCycleCount := 0;
+        endCycleCount := 0;
 
         if EnableSoundProcessing(ONE_GAMEHWND) then
           CreateSoundBuffer(ONE_SOUNDBUFFER);
@@ -148,18 +152,17 @@
        // QueryPerformanceCounter(lastCounter);
 
         {$Region 1.Frame}
+        {Start measuring time before the GameLoop starts..}
+        lastCycleCount := _rdtsc;
+        QueryPerformanceCounter(lastCounter);
+
         while RUNNING do
         begin
           ProceedWin32MessagesFromAppQueue;
 
-          {Start measuring time before the GameLoop starts..}
-          QueryPerformanceCounter(lastCounter);
-
           {......................................}
           WriteSamplesToSoundBuffer(@ONE_SOUNDBUFFER);
           PlayTheSoundBuffer(@ONE_SOUNDBUFFER);
-
-          {......................................}
 
           {......................................}
           WritePixelsToBuffer(@INPUT_PIXELBUFFER, x, y);
@@ -168,20 +171,21 @@
           Inc(y);
 
           {Start measuring time right after the GameLoop finishes}
+          endCycleCount := _rdtsc;
           QueryPerformanceCounter(endCounter);
 
+          cyclesElapsed := QWORD(endCycleCount - lastCycleCount);
           timeElapsed := endCounter - lastCounter;
-          timeElapsedInMS := (1000*timeElapsed);
 
-          millisecPerFrame := timeElapsedInMS div ClocksPerSecond;
-
+          millisecPerFrame := (1000*timeElapsed) div ClocksPerSecond;
           fps := ClocksPerSecond div timeElapsed;
+          megaCyclesElapsed := cyclesElapsed div (1000 * 1000);
 
-          //rewrite(StdErr);
-          writeln(StdErr, 'Milliseconds/Frame: ', millisecPerFrame, ' ||| FPS:  ', fps);
+          writeln(StdErr, 'Milliseconds/Frame: ', millisecPerFrame, ' ||| FPS:  ', fps, '|||  MHZ: ' ,megaCyclesElapsed);
           writeln;
 
           lastCounter := endCounter;
+          lastCycleCount := endCycleCount;
           {......................................}
         end;
        {$Region 1.Frame}

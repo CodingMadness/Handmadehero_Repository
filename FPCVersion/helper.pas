@@ -47,10 +47,17 @@ interface
      function GetFunctionReturnMessage(const code: HRESULT): TCallReturnMessage;
      procedure PrintLockState(const info: PLockState);
      procedure PrintUnlockState(const info: PUnlockState);
+     function _rdtsc: QWORD; assembler;
+
 
      var ClocksPerSecond: TLargeInteger;
 
 implementation
+
+    function _rdtsc: QWORD; assembler;
+    asm
+      rdtsc
+    end;
 
     function GetFunctionReturnMessage(const code: HRESULT): TCallReturnMessage;
     var
