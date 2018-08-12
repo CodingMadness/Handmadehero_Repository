@@ -276,7 +276,6 @@
       end;
 
       procedure WriteSamplesToSoundBuffer(const soundBuffer: PSoundBuffer);
-      var state: string;
       begin
         with soundBuffer^.ManipulatableRegion do
         begin

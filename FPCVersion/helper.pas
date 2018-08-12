@@ -48,9 +48,9 @@ interface
      procedure PrintLockState(const info: PLockState);
      procedure PrintUnlockState(const info: PUnlockState);
 
+     var ClocksPerSecond: TLargeInteger;
+
 implementation
-//    var
-  //   lockTextBuffer: TTextBuffer;
 
     function GetFunctionReturnMessage(const code: HRESULT): TCallReturnMessage;
     var

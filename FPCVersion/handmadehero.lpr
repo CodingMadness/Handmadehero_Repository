@@ -12,6 +12,9 @@ var
   pwnd: PWNDCLASSA = nil;
 
 begin
+  {Get the app-startup-frequency of the processor}
+  QueryPerformanceFrequency(ClocksPerSecond);
+
   CreateWindowObject(pwnd);
 
   if RegisterWindow(pwnd) then

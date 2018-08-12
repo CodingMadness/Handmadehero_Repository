@@ -28,13 +28,14 @@
         GameInput,
         GameSound,
         GameGraphics,
-        classes;
+        LazLogger,
+        Helper;
 
       var
         RUNNING: boolean;
-        ONE_PIXELBUFFER: TPixelBuffer;
+        INPUT_PIXELBUFFER: TPixelBuffer;
         ONE_SOUNDBUFFER: TSoundBuffer;
-        ONE_GAMEWINDOW: Rect;
+        OUTPUT_GAMEWINDOW: Rect;
         ONE_DC: HDC;
 
       function MainWindowCallback(const window: HWND; const message: UINT;
@@ -60,8 +61,8 @@
 
             WM_SIZE:
             begin
-              GetClientRect(window, @ONE_GAMEWINDOW);
-              CreateWindowSizedBuffer(@ONE_PIXELBUFFER, TMaxWidth(ONE_GAMEWINDOW.Width), TMaxHeight(ONE_GAMEWINDOW.Height));
+              GetClientRect(window, @OUTPUT_GAMEWINDOW);
+              CreateWindowSizedBuffer(@INPUT_PIXELBUFFER, TMaxWidth(OUTPUT_GAMEWINDOW.Width), TMaxHeight(OUTPUT_GAMEWINDOW.Height));
             end;
 
             WM_QUIT: RUNNING := False;
@@ -81,8 +82,8 @@
             WM_PAINT:
             begin
               ONE_DC := BeginPaint(window, @paintobj);
-              WritePixelsToBuffer(@ONE_PIXELBUFFER, 0, 0);
-              DrawPixelBuffer(ONE_DC, @ONE_PIXELBUFFER, @ONE_GAMEWINDOW);
+              WritePixelsToBuffer(@INPUT_PIXELBUFFER, 0, 0);
+              DrawPixelBuffer(ONE_DC, @INPUT_PIXELBUFFER, @OUTPUT_GAMEWINDOW);
               EndPaint(window, @paintobj);
             end;
 
@@ -120,7 +121,6 @@
         winMsg: MSG;
       begin
         winMsg := default(MSG);
-        RUNNING := True;
 
         {Removes 1 Message from the the app-thread messagequeue}
         while (PeekMessage(@winMsg, 0, 0, 0, PM_REMOVE)) do
@@ -133,6 +133,8 @@
       procedure StartGameLoop;
       var
         x, y: integer;
+        lastCounter, endCounter, timeElapsed : TLargeInteger;
+        timeElapsedInMS, millisecPerFrame: TLargeInteger;
       begin
         RUNNING := True;
         x := 0;
@@ -141,10 +143,16 @@
         if EnableSoundProcessing(ONE_GAMEHWND) then
           CreateSoundBuffer(ONE_SOUNDBUFFER);
 
+       // {Start measuring time before the GameLoop starts..}
+       // QueryPerformanceCounter(lastCounter);
 
+        {$Region 1.Frame}
         while RUNNING do
         begin
           ProceedWin32MessagesFromAppQueue;
+
+          {Start measuring time before the GameLoop starts..}
+          QueryPerformanceCounter(lastCounter);
 
           {......................................}
           WriteSamplesToSoundBuffer(@ONE_SOUNDBUFFER);
@@ -153,11 +161,23 @@
           {......................................}
 
           {......................................}
-          WritePixelsToBuffer(@ONE_PIXELBUFFER, x, y);
-          DrawPixelBuffer(ONE_DC, @ONE_PIXELBUFFER, @ONE_GAMEWINDOW);
+          WritePixelsToBuffer(@INPUT_PIXELBUFFER, x, y);
+          DrawPixelBuffer(ONE_DC, @INPUT_PIXELBUFFER, @OUTPUT_GAMEWINDOW);
           Inc(x);
           Inc(y);
+
+          {Start measuring time right after the GameLoop finishes}
+          QueryPerformanceCounter(endCounter);
+
+          timeElapsed := endCounter - lastCounter;
+          timeElapsedInMS := (1000*timeElapsed);
+          millisecPerFrame := timeElapsedInMS div ClocksPerSecond;
+
+          writeLn(StdErr, 'Milliseconds/Frame: ', millisecPerFrame);
+
+          lastCounter := endCounter;
           {......................................}
         end;
+       {$Region 1.Frame}
       end;
 end.
