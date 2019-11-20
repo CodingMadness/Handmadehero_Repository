@@ -84,30 +84,30 @@
 
       {PRIVATE}
       procedure UnlockRegionsWithin(const soundBuffer: PSoundBuffer);
-        procedure _log_UnlockingState(const errorCode: HANDLE);
+        procedure _log_UnlockingState(const evaluationCode: HANDLE);
         var
-          operationSuccessful: boolean;
+          operationSuccessful: BOOL;
         begin
-          operationSuccessful := (errorCode > 0);
+          operationSuccessful := SUCCEEDED(evaluationCode);
 
           with soundBuffer^.ManipulatableRegion.StateAfterUnlock do
           begin
             // here we are always NO, since we are in the "Unlock" and not "Lock" procedure!
             currentOperation.IsOperationLocking := NO;
 
-            if operationSuccessful then
-            begin
-              currentOperation.IsOperationAlsoSuccessFul := true;
-              SuceededUntilNow += 1;
-            end
+            case operationSuccessful of
+              true:  begin
+                       SuceededUntilNow += 1;
+                       currentOperation.IsOperationAlsoSuccessFul := true;
+                     end;
 
-            else
-            begin
-              currentOperation.IsOperationAlsoSuccessFul := false;
-              FailedUntilNow += 1;
+              false: begin
+                       FailedUntilNow += 1;
+                       currentOperation.IsOperationAlsoSuccessFul := false;
+                     end;
             end;
 
-            ReturnMessage := GetFunctionReturnMessage(errorCode);
+            ReturnMessage := GetFunctionReturnMessage(evaluationCode);
           end;
          end;
       var
@@ -157,30 +157,30 @@
           end;
         end;
 
-        procedure _log_LockingState(const errorCode: HANDLE);
+        procedure _log_LockingState(const evaluationCode: HANDLE);
         var
           operationSuccessful: boolean;
         begin
-          operationSuccessful := (errorCode > 0);
+          operationSuccessful := SUCCEEDED(evaluationCode);
 
           with soundBuffer^.ManipulatableRegion.StateAfterlock do
           begin
             // here IsOperationLocking is always YES, since we are in the "lock" procedure!
             currentOperation.IsOperationLocking := YES;
 
-            if operationSuccessful then
-            begin
-              currentOperation.IsOperationAlsoSuccessFul := true;
-              SuceededUntilNow += 1;
-            end
+            case operationSuccessful of
+              true:  begin
+                       SuceededUntilNow += 1;
+                       currentOperation.IsOperationAlsoSuccessFul := true;
+                     end;
 
-            else
-            begin
-              currentOperation.IsOperationAlsoSuccessFul := false;
-              FailedUntilNow += 1;
+              false: begin
+                       FailedUntilNow += 1;
+                       currentOperation.IsOperationAlsoSuccessFul := false;
+                     end;
             end;
 
-            ReturnMessage := GetFunctionReturnMessage(errorCode);
+            ReturnMessage := GetFunctionReturnMessage(evaluationCode);
           end;
         end;
 
@@ -200,7 +200,7 @@
       begin
         soundBuffer^.ManipulatableRegion.ToLock := _computedRegion;
         code := _internalLock;
-        _log_LockingState(code);
+        _log_LockingState(code);          //--------> here the current code change
       end;
 
       procedure WriteSamplesTolockedRegion(const lockedRegion: TRegion; var wavePos: TSine; var globalSampleIndex: TInfiniteSampleIndex);

@@ -170,23 +170,25 @@
           Inc(x);
           Inc(y);
 
-          {Start measuring time right after the GameLoop finishes}
-          endCycleCount := _rdtsc;
-          QueryPerformanceCounter(endCounter);
+          {
+            {Start measuring time right after the GameLoop finishes}
+            endCycleCount := _rdtsc;
+            QueryPerformanceCounter(endCounter);
 
-          cyclesElapsed := QWORD(endCycleCount - lastCycleCount);
-          timeElapsed := endCounter - lastCounter;
+            cyclesElapsed := QWORD(endCycleCount - lastCycleCount);
+            timeElapsed := endCounter - lastCounter;
 
-          millisecPerFrame := (1000*timeElapsed) div ClocksPerSecond;
-          fps := ClocksPerSecond div timeElapsed;
-          megaCyclesElapsed := cyclesElapsed div (1000 * 1000);
+            millisecPerFrame := (1000*timeElapsed) div ClocksPerSecond;
+            fps := ClocksPerSecond div timeElapsed;
+            megaCyclesElapsed := cyclesElapsed div (1000 * 1000);
 
-          writeln(StdErr, 'Milliseconds/Frame: ', millisecPerFrame, ' ||| FPS:  ', fps, '|||  MHZ: ' ,megaCyclesElapsed);
-          writeln;
+            writeln(StdErr, 'Milliseconds/Frame: ', millisecPerFrame, ' ||| FPS:  ', fps, '|||  MHZ: ' ,megaCyclesElapsed);
+            writeln;
 
-          lastCounter := endCounter;
-          lastCycleCount := endCycleCount;
-          {......................................}
+            lastCounter := endCounter;
+            lastCycleCount := endCycleCount;
+            {......................................}
+          }
         end;
        {$Region 1.Frame}
       end;
