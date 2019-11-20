@@ -3,10 +3,7 @@ unit Helper;
 
 interface
     uses
-      Classes, windows, SysUtils, crt;
-
-    //const
-      //OPERATIONS : array[0..1] of String[6] = ('LOCK', 'UNLOCK');
+      Classes, windows, SysUtils , crt;
 
     type
       TOperationName = String[6]; //6 chars for lock and unlock
@@ -66,37 +63,42 @@ implementation
       msgBuf := nil;
     end;
 
-    procedure WriteEmptyLines(const newLines: DWORD);
+    procedure WriteEmptyLines(const newLineCount: DWORD);
     var start: DWORD;
     begin
-      for start := 0 to newLines do
+      for start := 0 to newLineCount do
         writeln;
     end;
 
     {$Region PRIVATE SECTION}
-    procedure WriteNumberToTextBuffer(const info: PAfterOperationData; const call: TOperationName);
+    procedure WriteCallCountToTextBuffer(const info: PAfterOperationData; const call: TOperationName);
     begin
-      write('This is number: ');
+      TextColor(127);
+      write('Current number of ', '[',call,']', ' calls:          ');      {
+                                                                             10chars extra space to be correctly aligned with the rest
+                                                                             of the stats which are printed out!
+                                                                           }
       TextColor(Green);
       write('(', info^.CallCount, ')');
       TextColor(White);
-      write('of: ' + call, ' calls');
-      TextColor(white);
       writeln;
     end;
 
     procedure WriteSuccessToTextBuffer(const info: PAfterOperationData; const call: TOperationName);
     begin
-      write('Did the current : ' + call, ' succeed?: ');
+      write('Did the current : ' , '[',call,']', ' succeed?:       '); {
+                                                                        7chars extra space to be correctly aligned with the rest
+                                                                        of the stats which are printed out!
+                                                                        }
       TextColor(Green);
       write('(', info^.currentOperation.IsOperationAlsoSuccessFul, ')');
       TextColor(White);
       writeln;
     end;
 
-    procedure WriteCallMessageTextBuffer(const info: PAfterOperationData; const call: TOperationName);
+    procedure WriteCallMessageToTextBuffer(const info: PAfterOperationData; const call: TOperationName);
     begin
-      write('Result Message of: ');
+      write('Result Message of:                       '); //20char extra space!
 
       if info^.currentOperation.IsOperationAlsoSuccessFul then
         TextColor(Green)
@@ -110,18 +112,24 @@ implementation
 
     procedure WriteSucceededUntilNowToTextBuffer(const info: PAfterOperationData; const call: TOperationName);
     begin
-     write('Count of succeeded  ', call, 's until now: ');
-     TextColor(Red);
-     write(info^.SuceededUntilNow);
+     write('Count of succeeded ', '[', call, 'S', ']', ' until now:    ');{
+                                                                             4chars extra space to be correctly aligned with the rest
+                                                                             of the stats which are printed out!
+                                                                           }
+     TextColor(Green);
+     write('(', info^.SuceededUntilNow, ')');
      writeln;
      TextColor(White);
     end;
 
     procedure WriteFailedUntilNowToTextBuffer(const info: PAfterOperationData; const call: TOperationName);
     begin
-     write('Count of failed  ', call, 's until now: ');
+     write('Count of failed ', '[', call, 'S', ']', ' until now:       '); {
+                                                                             7chars extra space to be correctly aligned with the rest
+                                                                             of the stats which are printed out!
+                                                                           }
      TextColor(Red);
-     write(info^.FailedUntilNow);
+     write('(', info^.FailedUntilNow, ')');
      writeln;
      TextColor(White);
     end;
@@ -131,17 +139,17 @@ implementation
     var
      currentOperation: string[6];
     begin
-      case currState^.currentOperation.IsOperationLocking of     //---> error: SIGSEGV
+      case currState^.currentOperation.IsOperationLocking of
         YES:          currentOperation := 'LOCK';
         NO:           currentOperation := 'UNLOCK';
         UNDEFINED:    currentOperation := 'NOCALL';
       end;
 
-      WriteNumberToTextBuffer(@currState, currentOperation);
-      WriteSuccessToTextBuffer(@currState, currentOperation);
-      WriteCallMessageTextBuffer(@currState, currentOperation);
-      WriteSucceededUntilNowToTextBuffer(@currState, currentOperation);
-      WriteFailedUntilNowToTextBuffer(@currState, currentOperation);
+      WriteCallCountToTextBuffer(currState, currentOperation);
+      WriteSuccessToTextBuffer(currState, currentOperation);
+      WriteCallMessageToTextBuffer(currState, currentOperation);
+      WriteSucceededUntilNowToTextBuffer(currState, currentOperation);
+      WriteFailedUntilNowToTextBuffer(currState, currentOperation);
       WriteEmptyLines(2);
     end;
 end.

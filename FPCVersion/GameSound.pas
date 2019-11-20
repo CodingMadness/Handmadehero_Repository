@@ -73,6 +73,7 @@
 
         PSoundBuffer = ^TSoundBuffer;
 
+
       function EnableSoundProcessing(const hwnd: HWND): boolean;
       procedure CreateSoundBuffer(var soundBuffer: TSoundBuffer);
       procedure WriteSamplesToSoundBuffer(const soundBuffer: PSoundBuffer);
@@ -85,17 +86,14 @@
       {PRIVATE}
       procedure UnlockRegionsWithin(const soundBuffer: PSoundBuffer);
         procedure _log_UnlockingState(const evaluationCode: HANDLE);
-        var
-          operationSuccessful: BOOL;
         begin
-          operationSuccessful := SUCCEEDED(evaluationCode);
-
           with soundBuffer^.ManipulatableRegion.StateAfterUnlock do
           begin
             // here we are always NO, since we are in the "Unlock" and not "Lock" procedure!
             currentOperation.IsOperationLocking := NO;
+            CallCount += 1;
 
-            case operationSuccessful of
+            case SUCCEEDED(evaluationCode) of
               true:  begin
                        SuceededUntilNow += 1;
                        currentOperation.IsOperationAlsoSuccessFul := true;
@@ -105,6 +103,8 @@
                        FailedUntilNow += 1;
                        currentOperation.IsOperationAlsoSuccessFul := false;
                      end;
+              else
+                raise EAccessViolation.Create('upsi');
             end;
 
             ReturnMessage := GetFunctionReturnMessage(evaluationCode);
@@ -158,17 +158,14 @@
         end;
 
         procedure _log_LockingState(const evaluationCode: HANDLE);
-        var
-          operationSuccessful: boolean;
         begin
-          operationSuccessful := SUCCEEDED(evaluationCode);
-
           with soundBuffer^.ManipulatableRegion.StateAfterlock do
           begin
             // here IsOperationLocking is always YES, since we are in the "lock" procedure!
+            CallCount += 1;
             currentOperation.IsOperationLocking := YES;
 
-            case operationSuccessful of
+            case SUCCEEDED(evaluationCode) of
               true:  begin
                        SuceededUntilNow += 1;
                        currentOperation.IsOperationAlsoSuccessFul := true;
@@ -177,7 +174,9 @@
               false: begin
                        FailedUntilNow += 1;
                        currentOperation.IsOperationAlsoSuccessFul := false;
-                     end;
+                     end
+              else
+                raise EArgumentException.Create('Upsi');
             end;
 
             ReturnMessage := GetFunctionReturnMessage(evaluationCode);
@@ -271,15 +270,13 @@
 
         with soundBuffer.ManipulatableRegion do
         begin
-          ToLock := Default(TRegion);
-          ManipulatedRegions[0] := Default(TRegion);
-          ManipulatedRegions[1] := Default(TRegion);
-          Cursor.PlayCursor := DEFAULT_CURSOR_POS;
-          Cursor.WriteCursor := DEFAULT_CURSOR_POS;
-          Cursor.TargetCursor := DEFAULT_CURSOR_POS;
+           ToLock := Default(TRegion);
+           ManipulatedRegions[0] := Default(TRegion);
+           ManipulatedRegions[1] := Default(TRegion);
+           Cursor.PlayCursor := DEFAULT_CURSOR_POS;
+           Cursor.WriteCursor := DEFAULT_CURSOR_POS;
+           Cursor.TargetCursor := DEFAULT_CURSOR_POS;
 
-          with soundBuffer.ManipulatableRegion do
-          begin
            StateAfterLock:= Default(TAfterOperationStatus);
            StateAfterLock.currentOperation.IsOperationLocking := UNDEFINED;
            StateAfterLock.SuceededUntilNow := 0;
@@ -296,35 +293,31 @@
            StateAfterUnlock.SuceededUntilNow := 0;
            StateAfterUnlock.ReturnMessage := '';
            StateAfterUnlock.CallCount := 0;
-          end;
         end;
 
         bufferCreated := DS8.CreateSoundBuffer(bfdesc, soundBuffer.Content, nil) >= 0;
 
-        if not bufferCreated then raise Exception.Create('Somehow the Creation of soundBuffer didnt work properly');
+        if not bufferCreated then raise Exception.Create('Somewhere in the initialization process we messed up some values');
       end;
 
       procedure WriteSamplesToSoundBuffer(const soundBuffer: PSoundBuffer);
       begin
         with soundBuffer^.ManipulatableRegion do
         begin
-          with soundBuffer^.ManipulatableRegion do
-          begin
-            LockRegionsWithin(soundBuffer);
+           LockRegionsWithin(soundBuffer);
 
-            if not soundBuffer^.Playing then
-              PrintOperationsState(@StateAfterLock);
-
-            if not StateAfterLock.currentOperation.IsOperationAlsoSuccessFul then exit;
+           if StateAfterLock.currentOperation.IsOperationAlsoSuccessFul then
+           begin
+             PrintOperationsState(@StateAfterLock);
 
             (*-LockedRegion1-*)
-            WriteSamplesTolockedRegion(ManipulatedRegions[0], soundBuffer^.WavePosition, soundBuffer^.GlobalSampleIndex);
+             WriteSamplesTolockedRegion(ManipulatedRegions[0], soundBuffer^.WavePosition, soundBuffer^.GlobalSampleIndex);
 
             (*-LockedRegion2-*)
-            WriteSamplesTolockedRegion(ManipulatedRegions[1], soundBuffer^.WavePosition, soundBuffer^.GlobalSampleIndex);
+             WriteSamplesTolockedRegion(ManipulatedRegions[1], soundBuffer^.WavePosition, soundBuffer^.GlobalSampleIndex);
 
-            UnlockRegionsWithin(soundBuffer);
-          end;
+             UnlockRegionsWithin(soundBuffer);
+           end;
         end;
       end;
 
