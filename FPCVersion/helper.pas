@@ -5,48 +5,35 @@ interface
     uses
       Classes, windows, SysUtils, crt;
 
+    //const
+      //OPERATIONS : array[0..1] of String[6] = ('LOCK', 'UNLOCK');
+
     type
-      TFunctioName = String[8];
+      TOperationName = String[6]; //6 chars for lock and unlock
 
       TCallReturnMessage = String[38];
 
-      TFilter = (SucceededOnes, FailedOnes, All);
+      T3BITS = (UNDEFINED, YES, NO);
 
-      TCall = (Lock, Unlock);
+      TCurrentOperation = record
+        case IsOperationLocking: T3BITS of
+          YES, false: (IsOperationAlsoSuccessFul: boolean;);
+          UNDEFINED:();
+      end;
 
-      TNumber = QWORD;
+      TLargeCount = QWORD;
 
-      TAfterCallData = record
-        Number: TNumber;
-        CallSuceeded: Boolean;
-        FunctionName: TFunctioName;
+      TAfterOperationStatus = record
+        currentOperation: TCurrentOperation;
+        CallCount: TLargeCount;
+        SuceededUntilNow, FailedUntilNow: TLargeCount;
         ReturnMessage: TCallReturnMessage;
       end;
 
-      TLockState = record
-        infoAfterLock : TAfterCallData;
-        SuceededUntilNow, FailedUntilNow: TNumber;
-      end;
-
-      TUnlockState = record
-        infoAfterUnlock : TAfterCallData;
-        SuceededUntilNow, FailedUntilNow: TNumber;
-      end;
-
-      TManipulatedRegionState = record //make a variant-record out of this!
-        LockState: TLockState;
-        UnlockState: TUnlockState;
-      end;
-
-      PLockState = ^TLockState;
-      PUnlockState = ^TUnlockState;
-
-      PManinpulatedRegionState = ^TManipulatedRegionState;
-
+      PAfterOperationData = ^TAfterOperationStatus;
 
      function GetFunctionReturnMessage(const code: HRESULT): TCallReturnMessage;
-     procedure PrintLockState(const info: PLockState);
-     procedure PrintUnlockState(const info: PUnlockState);
+     procedure PrintOperationsState(const currState: PAfterOperationData);
      function _rdtsc: QWORD; assembler;
 
 
@@ -87,196 +74,75 @@ implementation
     end;
 
     {$Region PRIVATE SECTION}
-    procedure WriteNumberToTextBuffer(const info: PManinpulatedRegionState; const call: TCall);
-    var
-      callName: TCallReturnMessage;
-      number: TNumber;
+    procedure WriteNumberToTextBuffer(const info: PAfterOperationData; const call: TOperationName);
     begin
-      if call = Lock then
-      begin
-        callName := info^.LockState.infoAfterLock.FunctionName;
-        number := info^.LockState.infoAfterLock.Number;
-      end
-
-      else
-      begin
-        callName := info^.UnlockState.infoAfterUnlock.FunctionName;
-        number := info^.UnlockState.infoAfterUnlock.Number;
-      end;
-
       write('This is number: ');
-      write('(', number, ') ');
-      TextColor(white);
-      write('of ', callName, ' calls');
+      TextColor(Green);
+      write('(', info^.CallCount, ')');
+      TextColor(White);
+      write('of: ' + call, ' calls');
       TextColor(white);
       writeln;
     end;
 
-    procedure WriteSuccessToTextBuffer(const info: PManinpulatedRegionState; const call: TCall);
-    var
-      callName: TCallReturnMessage;
-      succeed: boolean;
+    procedure WriteSuccessToTextBuffer(const info: PAfterOperationData; const call: TOperationName);
     begin
-      if call = Lock then
-      begin
-        callName := info^.LockState.infoAfterLock.FunctionName;
-        succeed := info^.LockState.infoAfterLock.CallSuceeded;
-      end
-
-      else
-      begin
-        callName := info^.UnlockState.infoAfterUnlock.FunctionName;
-        succeed := info^.UnlockState.infoAfterUnlock.CallSuceeded;
-      end;
-
-      write('Did the ' + callName + ' succeed:? ');
-
-      if succeed then
-        TextColor(Green)
-      else
-        TextColor(Red);
-
-      writeln('(', succeed, ')');
-      TextColor(white);
+      write('Did the current : ' + call, ' succeed?: ');
+      TextColor(Green);
+      write('(', info^.currentOperation.IsOperationAlsoSuccessFul, ')');
+      TextColor(White);
+      writeln;
     end;
 
-    procedure WriteCallMessageTextBuffer(const info: PManinpulatedRegionState; const call: TCall);
-     var
-      callMsg: TCallReturnMessage;
-      succeed: boolean;
+    procedure WriteCallMessageTextBuffer(const info: PAfterOperationData; const call: TOperationName);
     begin
-      if call = Lock then
-      begin
-        callMsg := info^.LockState.infoAfterLock.ReturnMessage;
-        succeed := info^.LockState.infoAfterLock.CallSuceeded;
-      end
+      write('Result Message of: ');
 
-      else
-      begin
-        callMsg := info^.UnlockState.infoAfterUnlock.ReturnMessage;
-        succeed := info^.UnlockState.infoAfterUnlock.CallSuceeded;
-      end;
-
-     write('Result Message of: ');
-
-      if succeed then
+      if info^.currentOperation.IsOperationAlsoSuccessFul then
         TextColor(Green)
       else
         TextColor(Red);
 
-      write('(', callMsg, ')');
+      write('(', info^.ReturnMessage, ')');
       writeln;
       TextColor(White);
     end;
 
-    procedure WriteSucceededUntilNowToTextBuffer(const info: PManinpulatedRegionState; const call: TCall);
-    var
-      callName: TCallReturnMessage;
-      succeedUntilNow: TNumber;
+    procedure WriteSucceededUntilNowToTextBuffer(const info: PAfterOperationData; const call: TOperationName);
     begin
-      if call = Lock then
-      begin
-        callName := info^.LockState.infoAfterLock.FunctionName;
-        succeedUntilNow := info^.LockState.SuceededUntilNow;
-      end
-
-      else
-      begin
-        callName := info^.UnlockState.infoAfterUnlock.ReturnMessage;
-        succeedUntilNow := info^.UnlockState.SuceededUntilNow;
-      end;
-
-     write('Count of succeeded  ', callName, ' until now: ');
-     TextColor(Green);
-     write(succeedUntilNow);
-     writeln;
-     TextColor(White);
-    end;
-
-    procedure WriteFailedUntilNowToTextBuffer(const info: PManinpulatedRegionState; const call: TCall);
-    var
-      callName: TCallReturnMessage;
-      failedCountUntilNow: TNumber;
-    begin
-      if call = Lock then
-      begin
-        callName := info^.LockState.infoAfterLock.FunctionName;
-        failedCountUntilNow := info^.LockState.FailedUntilNow;
-      end
-
-      else
-      begin
-        callName := info^.UnlockState.infoAfterUnlock.ReturnMessage;
-        failedCountUntilNow := info^.UnlockState.FailedUntilNow;
-      end;
-
-     write('Count of failed  ', callName, ' until now: ');
+     write('Count of succeeded  ', call, 's until now: ');
      TextColor(Red);
-     write(failedCountUntilNow);
+     write(info^.SuceededUntilNow);
      writeln;
      TextColor(White);
     end;
 
-    procedure WriteTotalCallCountToTextBuffer(const info: PManinpulatedRegionState; const call: TCall);
-     var
-      callName: TCallReturnMessage;
-      totalCallCount: TNumber;
+    procedure WriteFailedUntilNowToTextBuffer(const info: PAfterOperationData; const call: TOperationName);
     begin
-      if call = Lock then
-      begin
-        callName := info^.LockState.infoAfterLock.FunctionName;
-        totalCallCount := info^.LockState.FailedUntilNow +
-                          info^.LockState.SuceededUntilNow +
-                          info^.LockState.infoAfterLock.Number;
-      end
+     write('Count of failed  ', call, 's until now: ');
+     TextColor(Red);
+     write(info^.FailedUntilNow);
+     writeln;
+     TextColor(White);
+    end;
+   {$EndRegion}
 
-      else
-      begin
-        callName := info^.UnlockState.infoAfterUnlock.ReturnMessage;
-        totalCallCount := info^.UnlockState.FailedUntilNow +
-                          info^.UnlockState.SuceededUntilNow +
-                          info^.LockState.infoAfterLock.Number;
+    procedure PrintOperationsState(const currState: PAfterOperationData);
+    var
+     currentOperation: string[6];
+    begin
+      case currState^.currentOperation.IsOperationLocking of     //---> error: SIGSEGV
+        YES:          currentOperation := 'LOCK';
+        NO:           currentOperation := 'UNLOCK';
+        UNDEFINED:    currentOperation := 'NOCALL';
       end;
 
-     write('Total count of called  ', callName, ' until now: ');
-     TextColor(Yellow);
-     write('(', totalCallCount, ')');
-     writeln;
-     TextColor(White);
-    end;
-
-    {$EndRegion}
-
-    procedure PrintLockState(const info: PLockState);
-    var
-     pMRS: TManipulatedRegionState;
-    begin
-      pMRS.LockState := info^;
-
-      WriteNumberToTextBuffer(@pMRS, Lock);
-      WriteSuccessToTextBuffer(@pMRS, Lock);
-      WriteCallMessageTextBuffer(@pMRS, Lock);
-      WriteSucceededUntilNowToTextBuffer(@pMRS, Lock);
-      WriteFailedUntilNowToTextBuffer(@pMRS, Lock);
-      WriteTotalCallCountToTextBuffer(@pMRS, Lock);
-
+      WriteNumberToTextBuffer(@currState, currentOperation);
+      WriteSuccessToTextBuffer(@currState, currentOperation);
+      WriteCallMessageTextBuffer(@currState, currentOperation);
+      WriteSucceededUntilNowToTextBuffer(@currState, currentOperation);
+      WriteFailedUntilNowToTextBuffer(@currState, currentOperation);
       WriteEmptyLines(2);
     end;
-
-    procedure PrintUnlockState(const info: PUnlockState);
-    var
-     pMRS: TManipulatedRegionState;
-    begin
-      pMRS.UnlockState := info^;
-
-      WriteNumberToTextBuffer(@pMRS, Unlock);
-      WriteSuccessToTextBuffer(@pMRS, Unlock);
-      WriteCallMessageTextBuffer(@pMRS, Unlock);
-      WriteSucceededUntilNowToTextBuffer(@pMRS, Unlock);
-      WriteFailedUntilNowToTextBuffer(@pMRS, Unlock);
-
-      WriteEmptyLines(2);
-    end;
-
 end.
 

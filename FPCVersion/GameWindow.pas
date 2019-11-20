@@ -28,7 +28,7 @@
         GameInput,
         GameSound,
         GameGraphics,
-        LazLogger,
+        {LazLogger,}
         Helper;
 
       var
@@ -65,18 +65,18 @@
               CreateWindowSizedBuffer(@INPUT_PIXELBUFFER, TMaxWidth(OUTPUT_GAMEWINDOW.Width), TMaxHeight(OUTPUT_GAMEWINDOW.Height));
             end;
 
-            WM_QUIT: RUNNING := False;
+            WM_QUIT: RUNNING := false;
 
             WM_CLOSE:
             begin
               //TODO:(Shpend): Handle this as an information to the user
-              RUNNING := False;
+              RUNNING := false;
             end;
 
             WM_DESTROY:
             begin
               //TODO:(Shpend): Handle this as error
-              RUNNING := False;
+              RUNNING := false;
             end;
 
             WM_PAINT:
@@ -139,7 +139,7 @@
 
         lastCycleCount, endCycleCount, cyclesElapsed,megaCyclesElapsed: QWORD;
       begin
-        RUNNING := True;
+        RUNNING := true;
         x := 0;
         y := 0;
         lastCycleCount := 0;

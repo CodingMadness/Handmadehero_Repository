@@ -4,7 +4,7 @@
 
   INTERFACE
       USES
-        Windows, Helper, mmsystem, sysutils, DirectSound;
+        Windows, Helper, mmsystem, DirectSound, sysutils;
 
       const
         DEFAULT_CURSOR_POS = -1;
@@ -60,7 +60,7 @@
          ToLock: TRegion;
          ManipulatedRegions: array[0..1] of TRegion;
          Cursor: TSystemCursor;
-         ManipulatedRegionState: TManipulatedRegionState;
+         StateAfterLock, StateAfterUnlock: TAfterOperationStatus;
         end;
 
         TSoundBuffer = record
@@ -84,21 +84,32 @@
 
       {PRIVATE}
       procedure UnlockRegionsWithin(const soundBuffer: PSoundBuffer);
-        procedure IndentifyUnlockInfo(const code: HRESULT);
+        procedure _log_UnlockingState(const errorCode: HANDLE);
+        var
+          operationSuccessful: boolean;
         begin
-          with soundBuffer^.ManipulatableRegion.ManipulatedRegionState.UnlockState do
+          operationSuccessful := (errorCode > 0);
+
+          with soundBuffer^.ManipulatableRegion.StateAfterUnlock do
           begin
-            infoAfterUnlock.Number += 1;
-            infoAfterUnlock.CallSuceeded := (code >= 0);
+            // here we are always NO, since we are in the "Unlock" and not "Lock" procedure!
+            currentOperation.IsOperationLocking := NO;
 
-            if infoAfterUnlock.CallSuceeded then
-              SuceededUntilNow += 1
+            if operationSuccessful then
+            begin
+              currentOperation.IsOperationAlsoSuccessFul := true;
+              SuceededUntilNow += 1;
+            end
+
             else
+            begin
+              currentOperation.IsOperationAlsoSuccessFul := false;
               FailedUntilNow += 1;
+            end;
 
-            infoAfterUnlock.ReturnMessage := GetFunctionReturnMessage(code);
+            ReturnMessage := GetFunctionReturnMessage(errorCode);
           end;
-        end;
+         end;
       var
         code: HRESULT;
       begin
@@ -106,7 +117,7 @@
         begin
           code := soundBuffer^.Content.Unlock(ManipulatedRegions[0].Start, ManipulatedRegions[0].Size,
                                               ManipulatedRegions[1].Start, ManipulatedRegions[1].Size);
-          IndentifyUnlockInfo(code);
+          _log_UnlockingState(code);
         end;
       end;
 
@@ -119,7 +130,7 @@
           result.Size := TSampleInfo.LATENCYSAMPLECOUNT;
         end;
 
-        function computedRegion: TRegion; inline;
+        function _computedRegion: TRegion; inline;
         var
           positionValid: boolean;
           StartByteToLockFrom: TBufferSize;
@@ -146,23 +157,34 @@
           end;
         end;
 
-        procedure IndentifyLockInfo(const code: HRESULT); inline;
+        procedure _log_LockingState(const errorCode: HANDLE);
+        var
+          operationSuccessful: boolean;
         begin
-         with soundBuffer^.ManipulatableRegion.ManipulatedRegionState.LockState do
+          operationSuccessful := (errorCode > 0);
+
+          with soundBuffer^.ManipulatableRegion.StateAfterlock do
           begin
-            infoAfterLock.Number += 1;
-            infoAfterLock.CallSuceeded := (code >= 0);
+            // here IsOperationLocking is always YES, since we are in the "lock" procedure!
+            currentOperation.IsOperationLocking := YES;
 
-            if infoAfterLock.CallSuceeded then
-              SuceededUntilNow += 1
+            if operationSuccessful then
+            begin
+              currentOperation.IsOperationAlsoSuccessFul := true;
+              SuceededUntilNow += 1;
+            end
+
             else
+            begin
+              currentOperation.IsOperationAlsoSuccessFul := false;
               FailedUntilNow += 1;
+            end;
 
-            infoAfterLock.ReturnMessage := GetFunctionReturnMessage(code);
+            ReturnMessage := GetFunctionReturnMessage(errorCode);
           end;
         end;
 
-        function internalLock: HRESULT; inline;
+        function _internalLock: HRESULT; inline;
         begin
           with soundBuffer^.ManipulatableRegion do
           begin
@@ -176,9 +198,9 @@
       {$EndRegion NESTED ROUTINES}
       var code: HRESULT;
       begin
-        soundBuffer^.ManipulatableRegion.ToLock := computedRegion;
-        code := internalLock;
-        IndentifyLockInfo(code);
+        soundBuffer^.ManipulatableRegion.ToLock := _computedRegion;
+        code := _internalLock;
+        _log_LockingState(code);
       end;
 
       procedure WriteSamplesTolockedRegion(const lockedRegion: TRegion; var wavePos: TSine; var globalSampleIndex: TInfiniteSampleIndex);
@@ -256,17 +278,24 @@
           Cursor.WriteCursor := DEFAULT_CURSOR_POS;
           Cursor.TargetCursor := DEFAULT_CURSOR_POS;
 
-          with soundBuffer.ManipulatableRegion.ManipulatedRegionState do
+          with soundBuffer.ManipulatableRegion do
           begin
-           LockState.infoAfterLock := Default(TAfterCallData);
-           LockState.infoAfterLock.CallSuceeded := false;
-           LockState.infoAfterLock.FunctionName := '<LOCK>';
-           LockState.infoAfterLock.Number := 0;
+           StateAfterLock:= Default(TAfterOperationStatus);
+           StateAfterLock.currentOperation.IsOperationLocking := UNDEFINED;
+           StateAfterLock.SuceededUntilNow := 0;
+           StateAfterLock.FailedUntilNow:= 0;
+           StateAfterLock.ReturnMessage := '';
+           StateAfterLock.CallCount := 0;
 
-           UnlockState.infoAfterUnlock := Default(TAfterCallData);
-           UnlockState.infoAfterUnlock.CallSuceeded := false;
-           UnlockState.infoAfterUnlock.FunctionName := '<UNLOCK>';
-           UnlockState.infoAfterUnlock.Number := 0;
+           {contextwise its bad, but since its only init-proc it just means,
+           to init the value even tho it doesnt make sense,
+           since we didnt even start any sound processing!}
+           StateAfterUnlock := Default(TAfterOperationStatus);
+           StateAfterUnlock.currentOperation.IsOperationLocking := UNDEFINED;
+           StateAfterUnlock.FailedUntilNow:= 0;
+           StateAfterUnlock.SuceededUntilNow := 0;
+           StateAfterUnlock.ReturnMessage := '';
+           StateAfterUnlock.CallCount := 0;
           end;
         end;
 
@@ -279,14 +308,14 @@
       begin
         with soundBuffer^.ManipulatableRegion do
         begin
-          with soundBuffer^.ManipulatableRegion.ManipulatedRegionState do
+          with soundBuffer^.ManipulatableRegion do
           begin
             LockRegionsWithin(soundBuffer);
 
             if not soundBuffer^.Playing then
-              PrintLockState(@LockState);
+              PrintOperationsState(@StateAfterLock);
 
-            if not LockState.infoAfterLock.CallSuceeded then exit;
+            if not StateAfterLock.currentOperation.IsOperationAlsoSuccessFul then exit;
 
             (*-LockedRegion1-*)
             WriteSamplesTolockedRegion(ManipulatedRegions[0], soundBuffer^.WavePosition, soundBuffer^.GlobalSampleIndex);
@@ -295,8 +324,6 @@
             WriteSamplesTolockedRegion(ManipulatedRegions[1], soundBuffer^.WavePosition, soundBuffer^.GlobalSampleIndex);
 
             UnlockRegionsWithin(soundBuffer);
-
-            //Print(@UnlockState);
           end;
         end;
       end;

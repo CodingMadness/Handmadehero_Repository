@@ -29,12 +29,12 @@ interface
     PPixelBuffer = ^TPixelBuffer;
 
   procedure CreateWindowSizedBuffer(const pixelBuffer: PPixelBuffer; const width: TMaxWidth; const height: TMaxHeight);
-  procedure WritePixelsToBuffer(const pixelBuffer: PPixelBuffer; const xOffset, yOffset: integer); inline;
-  procedure DrawPixelBuffer(const phdc: HDC; const pixelBuffer: PPixelBuffer; const gameWindowRect: PRect); inline;
+  procedure WritePixelsToBuffer(const pixelBuffer: PPixelBuffer; const xOffset, yOffset: integer);
+  procedure DrawPixelBuffer(const phdc: HDC; const pixelBuffer: PPixelBuffer; const gameWindowRect: PRect);
 
   implementation
     {PRIVATE}
-    function CreatePixel(const r,g,b: integer): TPixel; inline;
+    function CreatePixel(const r,g,b: integer): TPixel;
     begin
       {Assignment based on the endianess of the underlying machine}
       result.PADDING := 0;
@@ -45,7 +45,7 @@ interface
 
     procedure FillPixelBuffer(const pixelBuffer: PPixelBuffer;
                               const width: TMaxWidth;
-                              const height: TMaxHeight); inline;
+                              const height: TMaxHeight);
     begin
       pixelBuffer^.Height := height;
       pixelBuffer^.Width := width;
@@ -56,7 +56,7 @@ interface
 
     procedure EnableGraphicProcessing(const pixelBuffer: PPixelBuffer;
                                       const width: TMaxWidth;
-                                      const height: TMaxHeight); inline;
+                                      const height: TMaxHeight);
     begin
       pixelBuffer^.INFO := default(BITMAPINFO);
       pixelBuffer^.INFO.bmiHeader.biSize := sizeOf(pixelBuffer^.INFO.bmiHeader);
@@ -67,7 +67,7 @@ interface
       pixelBuffer^.INFO.bmiHeader.biCompression := BI_RGB;
     end;
 
-    procedure FreeIfNeeded(const pixelBuffer: PPixelBuffer); inline;
+    procedure FreeIfNeeded(const pixelBuffer: PPixelBuffer);
     begin
      if pixelBuffer^.Content <> nil then
          dispose(pixelBuffer^.Content);
@@ -76,7 +76,7 @@ interface
 
 
     {PUBLIC}
-    procedure CreateWindowSizedBuffer(const pixelBuffer: PPixelBuffer; const width: TMaxWidth; const height: TMaxHeight); inline;
+    procedure CreateWindowSizedBuffer(const pixelBuffer: PPixelBuffer; const width: TMaxWidth; const height: TMaxHeight);
     begin
       FreeIfNeeded(pixelBuffer);
       EnableGraphicProcessing(pixelBuffer, width, height);
