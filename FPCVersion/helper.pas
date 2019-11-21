@@ -6,7 +6,7 @@ interface
       Classes, windows, SysUtils , crt;
 
     type
-      TOperationName = String[6]; //6 chars for lock and unlock
+      TOperationName = String[6]; //6 chars to occupy enough for lock and unlock string
 
       TCallReturnMessage = String[38];
 
@@ -29,14 +29,23 @@ interface
 
       PAfterOperationData = ^TAfterOperationStatus;
 
+      TPerformanceMeasure = record
+       lastCycleCount, endCycleCount, cyclesElapsed, megaCyclesElapsed,
+       lastCounter, endCounter, timeElapsed,
+       millisecondsPerFrame, framesPerSecond, ClocksPerSecond: TLargeInteger;
+      end;
+
      function GetFunctionReturnMessage(const code: HRESULT): TCallReturnMessage;
      procedure PrintOperationsState(const currState: PAfterOperationData);
-     function _rdtsc: QWORD; assembler;
 
-
-     var ClocksPerSecond: TLargeInteger;
+     procedure StartSpeedMeasurebeforeGameLogic;
+     procedure StartSpeedMeasureAfterLoopGameLogic
+     procedure OutputAllSpeedMeasurements;
 
 implementation
+    var
+      ONE_PERFORMANCEMEASURETOOL: TPerformanceMeasure;
+
 
     function _rdtsc: QWORD; assembler;
     asm
@@ -152,5 +161,53 @@ implementation
       WriteFailedUntilNowToTextBuffer(currState, currentOperation);
       WriteEmptyLines(2);
     end;
+
+    procedure StartSpeedMeasurebeforeGameLogic;
+    begin
+      QueryPerformanceCounter(@ONE_PERFORMANCEMEASURETOOL.lastCounter);
+    end;
+
+    procedure StartSpeedMeasureAfterLoopGameLogic;
+    begin
+      with ONE_PERFORMANCEMEASURETOOL do
+      begin
+        endCycleCount := _rdtsc;
+        QueryPerformanceCounter(endCounter);
+
+        cyclesElapsed := TLargeInteger(endCycleCount - lastCycleCount);
+        timeElapsed := endCounter - lastCounter;
+
+        millisecondsPerFrame := (1000*timeElapsed) div ClocksPerSecond;
+        framesPerSecond := ClocksPerSecond div timeElapsed;
+        megaCyclesElapsed := cyclesElapsed div (1000 * 1000);
+
+        lastCounter := endCounter;
+        lastCycleCount := endCycleCount;
+      end;
+    end;
+
+    procedure OutputAllSpeedMeasurements;
+    begin
+      with ONE_PERFORMANCEMEASURETOOL do
+      begin
+        {Output of the computed MillisecondsPerFrame}
+        write(StdErr, 'MillisecondsPerFrame:  ');
+        TextColor(Green);
+        write('(', millisecondsPerFrame, ')', sLineBreak, sLineBreak); //2new lines
+
+        {Output of the computed FramesPerSecond}
+        write(StdErr, 'FramesPerSecond:  ');
+        TextColor(Green);
+        write('(', framesPerSecond, ')', sLineBreak);  // //2new lines
+
+        {Output of the computed MegaCyclesElapsed}
+        write(StdErr, 'MegaCyclesElapsed in MHZ:  ');
+        TextColor(Green);
+        write('(', megaCyclesElapsed, ')', sLineBreak );  // //2new lines
+      end;
+    end;
+
+initialization
+  ONE_PERFORMANCEMEASURETOOL := default(TPerformanceMeasure);
 end.
 

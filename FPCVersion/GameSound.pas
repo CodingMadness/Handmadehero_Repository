@@ -308,7 +308,7 @@
 
            if StateAfterLock.currentOperation.IsOperationAlsoSuccessFul then
            begin
-             PrintOperationsState(@StateAfterLock);
+             //PrintOperationsState(@StateAfterLock);
 
             (*-LockedRegion1-*)
              WriteSamplesTolockedRegion(ManipulatedRegions[0], soundBuffer^.WavePosition, soundBuffer^.GlobalSampleIndex);
@@ -317,6 +317,8 @@
              WriteSamplesTolockedRegion(ManipulatedRegions[1], soundBuffer^.WavePosition, soundBuffer^.GlobalSampleIndex);
 
              UnlockRegionsWithin(soundBuffer);
+
+             //PrintOperationsState(@StateAfterUnlock)
            end;
         end;
       end;
