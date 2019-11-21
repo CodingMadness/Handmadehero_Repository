@@ -133,22 +133,17 @@
       procedure StartGameLoop;
       var
         x, y: integer;
-        lastCounter, endCounter, timeElapsed : TLargeInteger;
-        millisecPerFrame: TLargeInteger;
-        fps: TLargeInteger;
-
-        lastCycleCount, endCycleCount, cyclesElapsed,megaCyclesElapsed: QWORD;
       begin
         RUNNING := true;
         x := 0;
         y := 0;
-        lastCycleCount := 0;
-        endCycleCount := 0;
 
         if EnableSoundProcessing(ONE_GAMEHWND) then
           CreateSoundBuffer(ONE_SOUNDBUFFER);
 
         {$Region 1.Frame}
+        StartSpeedMeasurebeforeGameLogic;
+
         while RUNNING do
         begin
           ProceedWin32MessagesFromAppQueue;
@@ -162,6 +157,10 @@
           DrawPixelBuffer(ONE_DC, @INPUT_PIXELBUFFER, @OUTPUT_GAMEWINDOW);
           Inc(x);
           Inc(y);
+
+          StartSpeedMeasureAfterLoopGameLogic;
+
+          OutputAllSpeedMeasurements;
         end;
        {$Region 1.Frame}
       end;

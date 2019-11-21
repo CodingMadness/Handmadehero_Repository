@@ -38,8 +38,9 @@ interface
      function GetFunctionReturnMessage(const code: HRESULT): TCallReturnMessage;
      procedure PrintOperationsState(const currState: PAfterOperationData);
 
-     procedure StartSpeedMeasurebeforeGameLogic;
-     procedure StartSpeedMeasureAfterLoopGameLogic
+     procedure StartSpeedMeasureOnProgramStartup;
+     procedure StartSpeedMeasureBeforeGameLogicBegins;
+     procedure StartSpeedMeasureAfterLoopGameLogicBegins;
      procedure OutputAllSpeedMeasurements;
 
 implementation
@@ -162,12 +163,17 @@ implementation
       WriteEmptyLines(2);
     end;
 
-    procedure StartSpeedMeasurebeforeGameLogic;
+    procedure StartSpeedMeasureOnProgramStartup;
+    begin
+      QueryPerformanceCounter(ONE_PERFORMANCEMEASURETOOL.ClocksPerSecond);
+    end;
+
+    procedure StartSpeedMeasureBeforeGameLogicBegins;
     begin
       QueryPerformanceCounter(@ONE_PERFORMANCEMEASURETOOL.lastCounter);
     end;
 
-    procedure StartSpeedMeasureAfterLoopGameLogic;
+    procedure StartSpeedMeasureAfterLoopGameLogicBegins;
     begin
       with ONE_PERFORMANCEMEASURETOOL do
       begin
