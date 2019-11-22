@@ -38,15 +38,12 @@
         ONE_DC: HDC;
 
 
-      function MainWindowCallback(const window: HWND; const message: UINT;
+      function MAINWINDOWCALLBACK(const processID: HWND; const message: UINT;
           const wParam: WPARAM; const lParam: LPARAM): LRESULT;
         var
           paintobj: PAINTSTRUCT;
 
         begin
-          //create a fixed-size bitmapbuffer we can use for the entirety of the game!
-          CreateWindowSizedBuffer(@WIN32_BITMAPBUFFER, 1200, 800);
-
           case message of
             WM_KEYUP:
             begin
@@ -65,7 +62,7 @@
 
             WM_SIZE:
             begin
-              //..maybe something else will happen here later!..
+              CreateWindowSizedBuffer(@WIN32_BITMAPBUFFER, 1200, 800);
             end;
 
             WM_QUIT: RUNNING := false;
@@ -82,20 +79,24 @@
               RUNNING := false;
             end;
 
+            //We constantly force our Window to paint itself after the other mgs's were proceed
             WM_PAINT:
             begin
-              ONE_DC := BeginPaint(window, @paintobj);
+              ONE_DC := BeginPaint(processID, @paintobj);
               WritePixelsToBuffer(@WIN32_BITMAPBUFFER, 0, 0);
-              GetClientRect(window, OUTPUT_GAMEWINDOW);
+              GetClientRect(processID, OUTPUT_GAMEWINDOW);
               DrawPixelBuffer(ONE_DC, @WIN32_BITMAPBUFFER, OUTPUT_GAMEWINDOW.Width, OUTPUT_GAMEWINDOW.Height);
-              EndPaint(window, @paintobj);
+              EndPaint(processID, @paintobj);
             end;
 
             else
               {If we cant longint a message from the system, we send it back to the system and let it do what it needs to do}
-              Result := DefWindowProc(window, message, wParam, lParam);
+              Result := DefWindowProc(processID, message, wParam, lParam);
           end;
         end;
+{-----------------------------------------------------------------------------}
+
+
 
       procedure CreateWindowObject(var toAlloc: PWNDCLASSA);
       begin
@@ -103,7 +104,7 @@
         toAlloc^ := default(WNDCLASSA);
         toAlloc^.style := CS_VREDRAW or CS_HREDRAW or CS_OWNDC;
         toAlloc^.hInstance := GetModuleHandle(nil);
-        toAlloc^.lpfnWndProc := WNDPROC(@MainWindowCallback);
+        toAlloc^.lpfnWndProc := WNDPROC(@MAINWINDOWCALLBACK);
         toAlloc^.lpszClassName := 'HMH_WindowClass';
         toAlloc^.lpszMenuName := 'Handmade Hero';
       end;
@@ -141,8 +142,6 @@
         RUNNING := true;
         x := 0;
         y := 0;
-
-
 
         if EnableSoundProcessing(ONE_GAMEHWND) then
         begin

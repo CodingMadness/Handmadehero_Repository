@@ -107,6 +107,8 @@ interface
 
     procedure DrawPixelBuffer(const phdc: HDC; const pixelBuffer: PPixelBuffer; const gameWindowWidth: TMaxWidth; gameWindowHeight: TMaxHeight);
     begin
+      //Define Aspect Ratio
+      //TODO(Shpend): Play abit with Stretchmode
       StretchDIBits(phdc, 0, 0, gameWindowWidth, gameWindowHeight,
                           0, 0, pixelBuffer^.Width, pixelBuffer^.Height,
                           pixelBuffer^.Content,
