@@ -15,7 +15,7 @@
       type
         TMaxWidth  =  MIN_WIDTH..MAX_WIDTH;
         TMaxHeight =  MIN_HEIGHT..MAX_HEIGHT;
-        TWindowArea = 0..(MAX_WIDTH * MAX_HEIGHT);
+        TWindowArea = MIN_WIDTH * MIN_HEIGHT..MAX_WIDTH * MAX_HEIGHT;
 
       procedure CreateWindowObject(var toAlloc: PWNDCLASSA);
       function RegisterWindow(const wnd: PWNDCLASSA): boolean;
@@ -28,21 +28,25 @@
         GameInput,
         GameSound,
         GameGraphics,
-        {LazLogger,}
         Helper;
 
       var
         RUNNING: boolean;
-        INPUT_PIXELBUFFER: TPixelBuffer;
+        WIN32_BITMAPBUFFER: TPixelBuffer;
         ONE_SOUNDBUFFER: TSoundBuffer;
         OUTPUT_GAMEWINDOW: Rect;
         ONE_DC: HDC;
+
 
       function MainWindowCallback(const window: HWND; const message: UINT;
           const wParam: WPARAM; const lParam: LPARAM): LRESULT;
         var
           paintobj: PAINTSTRUCT;
+
         begin
+          //create a fixed-size bitmapbuffer we can use for the entirety of the game!
+          CreateWindowSizedBuffer(@WIN32_BITMAPBUFFER, 1200, 800);
+
           case message of
             WM_KEYUP:
             begin
@@ -61,8 +65,7 @@
 
             WM_SIZE:
             begin
-              GetClientRect(window, @OUTPUT_GAMEWINDOW);
-              CreateWindowSizedBuffer(@INPUT_PIXELBUFFER, TMaxWidth(OUTPUT_GAMEWINDOW.Width), TMaxHeight(OUTPUT_GAMEWINDOW.Height));
+              //..maybe something else will happen here later!..
             end;
 
             WM_QUIT: RUNNING := false;
@@ -82,13 +85,14 @@
             WM_PAINT:
             begin
               ONE_DC := BeginPaint(window, @paintobj);
-              WritePixelsToBuffer(@INPUT_PIXELBUFFER, 0, 0);
-              DrawPixelBuffer(ONE_DC, @INPUT_PIXELBUFFER, @OUTPUT_GAMEWINDOW);
+              WritePixelsToBuffer(@WIN32_BITMAPBUFFER, 0, 0);
+              GetClientRect(window, OUTPUT_GAMEWINDOW);
+              DrawPixelBuffer(ONE_DC, @WIN32_BITMAPBUFFER, OUTPUT_GAMEWINDOW.Width, OUTPUT_GAMEWINDOW.Height);
               EndPaint(window, @paintobj);
             end;
 
             else
-              {If we cant handle a message from the system, we send it back to the system and let it do what it needs to do}
+              {If we cant longint a message from the system, we send it back to the system and let it do what it needs to do}
               Result := DefWindowProc(window, message, wParam, lParam);
           end;
         end;
@@ -138,30 +142,30 @@
         x := 0;
         y := 0;
 
-        if EnableSoundProcessing(ONE_GAMEHWND) then
-          CreateSoundBuffer(ONE_SOUNDBUFFER);
 
-        {$Region 1.Frame}
-        StartSpeedMeasurebeforeGameLogic;
+
+        if EnableSoundProcessing(ONE_GAMEHWND) then
+        begin
+          CreateSoundBuffer(ONE_SOUNDBUFFER);
+          PlayTheSoundBuffer(@ONE_SOUNDBUFFER);
+        end;
+
+        StartSpeedMeasureBeforeGameLogicBegins;
 
         while RUNNING do
         begin
           ProceedWin32MessagesFromAppQueue;
 
-          {......................................}
           WriteSamplesToSoundBuffer(@ONE_SOUNDBUFFER);
-          PlayTheSoundBuffer(@ONE_SOUNDBUFFER);
 
-          {......................................}
-          WritePixelsToBuffer(@INPUT_PIXELBUFFER, x, y);
-          DrawPixelBuffer(ONE_DC, @INPUT_PIXELBUFFER, @OUTPUT_GAMEWINDOW);
-          Inc(x);
-          Inc(y);
+          WritePixelsToBuffer(@WIN32_BITMAPBUFFER, x, y);
+          DrawPixelBuffer(ONE_DC, @WIN32_BITMAPBUFFER, TMaxWidth(OUTPUT_GAMEWINDOW.Width), TMaxHeight(OUTPUT_GAMEWINDOW.Height));
 
-          StartSpeedMeasureAfterLoopGameLogic;
+          x+=5; //y+=2;
 
-          OutputAllSpeedMeasurements;
+          StartSpeedMeasureAfterLoopGameLogicEnd;
+
+          //OutputAllSpeedMeasurements;
         end;
-       {$Region 1.Frame}
       end;
 end.

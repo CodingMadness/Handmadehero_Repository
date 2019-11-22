@@ -40,7 +40,7 @@ interface
 
      procedure StartSpeedMeasureOnProgramStartup;
      procedure StartSpeedMeasureBeforeGameLogicBegins;
-     procedure StartSpeedMeasureAfterLoopGameLogicBegins;
+     procedure StartSpeedMeasureAfterLoopGameLogicEnd;
      procedure OutputAllSpeedMeasurements;
 
 implementation
@@ -173,7 +173,7 @@ implementation
       QueryPerformanceCounter(@ONE_PERFORMANCEMEASURETOOL.lastCounter);
     end;
 
-    procedure StartSpeedMeasureAfterLoopGameLogicBegins;
+    procedure StartSpeedMeasureAfterLoopGameLogicEnd;
     begin
       with ONE_PERFORMANCEMEASURETOOL do
       begin
@@ -212,8 +212,5 @@ implementation
         write('(', megaCyclesElapsed, ')', sLineBreak );  // //2new lines
       end;
     end;
-
-initialization
-  ONE_PERFORMANCEMEASURETOOL := default(TPerformanceMeasure);
 end.
 

@@ -30,20 +30,20 @@ interface
 
   procedure CreateWindowSizedBuffer(const pixelBuffer: PPixelBuffer; const width: TMaxWidth; const height: TMaxHeight);
   procedure WritePixelsToBuffer(const pixelBuffer: PPixelBuffer; const xOffset, yOffset: integer);
-  procedure DrawPixelBuffer(const phdc: HDC; const pixelBuffer: PPixelBuffer; const gameWindowRect: PRect);
+  procedure DrawPixelBuffer(const phdc: HDC; const pixelBuffer: PPixelBuffer; const gameWindowWidth:TMaxWidth; gameWindowHeight: TMaxHeight);
 
   implementation
     {PRIVATE}
-    function CreatePixel(const r,g,b: integer): TPixel;
+    function CreatePixel(const r,g,b: integer): TPixel; //<---- assignment not correct, look into it soon!
     begin
       {Assignment based on the endianess of the underlying machine}
       result.PADDING := 0;
-      result.Green :=   Byte(b);
+      result.Green :=   Byte(r);
       result.Red   :=   Byte(g);
-      result.Blue  :=   Byte(r);
+      result.Blue  :=   Byte(b);
     end;
 
-    procedure FillPixelBuffer(const pixelBuffer: PPixelBuffer;
+    procedure AllocatePixelBuffer(const pixelBuffer: PPixelBuffer;
                               const width: TMaxWidth;
                               const height: TMaxHeight);
     begin
@@ -51,12 +51,12 @@ interface
       pixelBuffer^.Width := width;
       pixelBuffer^.Area := TWindowArea(width * height);
       pixelBuffer^.TotalByteCount := TByteCount(pixelBuffer^.Area * PIXELSIZE);
-      pixelBuffer^.Content := PPixel(GetMem(pixelBuffer^.TotalByteCount));
+      pixelBuffer^.Content := PPixel(VirtualAlloc(nil, pixelBuffer^.TotalByteCount, MEM_COMMIT, PAGE_READWRITE));
     end;
 
-    procedure EnableGraphicProcessing(const pixelBuffer: PPixelBuffer;
-                                      const width: TMaxWidth;
-                                      const height: TMaxHeight);
+    procedure DefineBitmapLayout(const pixelBuffer: PPixelBuffer;
+                                 const width: TMaxWidth;
+                                 const height: TMaxHeight);
     begin
       pixelBuffer^.INFO := default(BITMAPINFO);
       pixelBuffer^.INFO.bmiHeader.biSize := sizeOf(pixelBuffer^.INFO.bmiHeader);
@@ -67,10 +67,10 @@ interface
       pixelBuffer^.INFO.bmiHeader.biCompression := BI_RGB;
     end;
 
-    procedure FreeIfNeeded(const pixelBuffer: PPixelBuffer);
+    procedure FreePixelBufferIfNeedBe(const pixelBuffer: PPixelBuffer);
     begin
      if pixelBuffer^.Content <> nil then
-         dispose(pixelBuffer^.Content);
+         VirtualFree(pixelBuffer^.Content, pixelBuffer^.TotalByteCount, MEM_RELEASE);
     end;
     {PRIVATE}
 
@@ -78,9 +78,9 @@ interface
     {PUBLIC}
     procedure CreateWindowSizedBuffer(const pixelBuffer: PPixelBuffer; const width: TMaxWidth; const height: TMaxHeight);
     begin
-      FreeIfNeeded(pixelBuffer);
-      EnableGraphicProcessing(pixelBuffer, width, height);
-      FillPixelBuffer(pixelBuffer, width, height);
+      FreePixelBufferIfNeedBe(pixelBuffer);
+      DefineBitmapLayout(pixelBuffer, width, height);
+      AllocatePixelBuffer(pixelBuffer, width, height);
     end;
 
     procedure WritePixelsToBuffer(const pixelBuffer: PPixelBuffer; const xOffset, yOffset: integer);
@@ -102,11 +102,12 @@ interface
 
         first += pixelBuffer^.Width;
       end;
+
     end;
 
-    procedure DrawPixelBuffer(const phdc: HDC; const pixelBuffer: PPixelBuffer; const gameWindowRect: PRect);
+    procedure DrawPixelBuffer(const phdc: HDC; const pixelBuffer: PPixelBuffer; const gameWindowWidth: TMaxWidth; gameWindowHeight: TMaxHeight);
     begin
-      StretchDIBits(phdc, 0, 0, gameWindowRect^.Width, gameWindowRect^.Height,
+      StretchDIBits(phdc, 0, 0, gameWindowWidth, gameWindowHeight,
                           0, 0, pixelBuffer^.Width, pixelBuffer^.Height,
                           pixelBuffer^.Content,
                           pixelBuffer^.INFO,
