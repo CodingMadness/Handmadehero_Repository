@@ -160,7 +160,7 @@
           WritePixelsToBuffer(@WIN32_BITMAPBUFFER, x, y);
           DrawPixelBuffer(ONE_DC, @WIN32_BITMAPBUFFER, TMaxWidth(OUTPUT_GAMEWINDOW.Width), TMaxHeight(OUTPUT_GAMEWINDOW.Height));
 
-          x+=5; //y+=2;
+          x+=3; y+=2;
 
           StartSpeedMeasureAfterLoopGameLogicEnd;
 

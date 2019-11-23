@@ -9,12 +9,12 @@ interface
 
   type
     TPixel = record
-      Green, Red, Blue, PADDING: Byte;
+      Blue, Green, Red, PADDING: Byte;
     end;
 
     PPixel = ^TPixel;
 
-    TByteCount = 0..(High(TWindowArea) * PIXELSIZE);
+    TTotalPixelByteLength = 0..(High(TWindowArea) * PIXELSIZE);
 
     TPixelBuffer = record
     public
@@ -23,7 +23,7 @@ interface
       Width: TMaxWidth;
       Height: TMaxHeight;
       Area: TWindowArea;
-      TotalByteCount: TByteCount;
+      TotalPixelByteLength: TTotalPixelByteLength;
     end;
 
     PPixelBuffer = ^TPixelBuffer;
@@ -34,24 +34,24 @@ interface
 
   implementation
     {PRIVATE}
-    function CreatePixel(const r,g,b: integer): TPixel; //<---- TODO(Shpend): assignment not correct, look into it soon!
+    function CreatePixel(const r, g, b: integer): TPixel;
     begin
-      {Assignment based on the endianess of the underlying machine}
-      result.PADDING := 0;
-      result.Green :=   Byte(r);
-      result.Red   :=   Byte(g);
-      result.Blue  :=   Byte(b);
+      result.Red      := Byte(r);
+      result.Green    := Byte(g);
+      result.Blue     := Byte(b);
+
+      result.PADDING  := 0;
     end;
 
     procedure AllocatePixelBuffer(const pixelBuffer: PPixelBuffer;
-                              const width: TMaxWidth;
-                              const height: TMaxHeight);
+                                  const width: TMaxWidth;
+                                  const height: TMaxHeight);
     begin
       pixelBuffer^.Height := height;
       pixelBuffer^.Width := width;
       pixelBuffer^.Area := TWindowArea(width * height);
-      pixelBuffer^.TotalByteCount := TByteCount(pixelBuffer^.Area * PIXELSIZE);
-      pixelBuffer^.Content := PPixel(VirtualAlloc(nil, pixelBuffer^.TotalByteCount, MEM_COMMIT, PAGE_READWRITE));
+      pixelBuffer^.TotalPixelByteLength := TTotalPixelByteLength(pixelBuffer^.Area * PIXELSIZE);
+      pixelBuffer^.Content := PPixel(VirtualAlloc(nil, pixelBuffer^.TotalPixelByteLength, MEM_COMMIT, PAGE_READWRITE));
     end;
 
     procedure DefineBitmapLayout(const pixelBuffer: PPixelBuffer;
@@ -70,7 +70,7 @@ interface
     procedure FreePixelBufferIfNeedBe(const pixelBuffer: PPixelBuffer);
     begin
      if pixelBuffer^.Content <> nil then
-         VirtualFree(pixelBuffer^.Content, pixelBuffer^.TotalByteCount, MEM_RELEASE);
+         VirtualFree(pixelBuffer^.Content, 0, MEM_RELEASE);
     end;
     {PRIVATE}
 
@@ -86,21 +86,21 @@ interface
     procedure WritePixelsToBuffer(const pixelBuffer: PPixelBuffer; const xOffset, yOffset: integer);
     var
       rowNr, columnNr: integer;
-      first, current: PPixel;
+      currentRow, currentColumn: PPixel;
     begin
-      first := pixelBuffer^.Content;
+      currentRow := pixelBuffer^.Content;
 
       for columnNr := 0 to (pixelBuffer^.Height - 1) do
       begin
-        current := first;
+        currentColumn := currentRow;
 
         for rowNr := 0 to (pixelBuffer^.Width - 1) do
         begin
-          current^ := CreatePixel((rowNr+xOffset), (columnNr+yOffset), (xOffset+yOffset));
-          Inc(current);
+          currentColumn^ := CreatePixel(255,0 ,0);
+          currentColumn += 1; //move pixelpointer to the right by sizeof(TPixel);
         end;
 
-        first += pixelBuffer^.Width;
+        currentRow += pixelBuffer^.Width;
       end;
 
     end;
