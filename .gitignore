@@ -18,6 +18,8 @@ $ git status
 *.xml
 *.ctps
 *.ctpr
+*.ico
 
 lib/
 .app/
+q
