@@ -16,6 +16,8 @@ $ git status
 *.or
 *.a
 *.xml
+*.ctps
+*.ctpr
 
 lib/
 .app/
