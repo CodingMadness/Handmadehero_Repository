@@ -2,10 +2,20 @@ $ git status
     [...]
     # Untracked files:
     [...]
-    #       lib/
-   #        handmadehero.exe
-   #        handmadehero.lpi
-   #        handmadehero.lps
-   #        handmadehero.res
-   #        C:\Users\shho3\OneDrive\Dokumente\GitHub\Handmadehero_Repository\FPCVersion\handmadehero.ico
-   #        C:\Users\shho3\OneDrive\Dokumente\GitHub\Handmadehero_Repository\FPCVersion\DelphiStyleExtended.xml
+
+*.exe
+*.dll
+*.so
+*.dylib
+*.ctrs
+*.res
+*.compiled
+*.dbg
+*.ppu
+*.o
+*.or
+*.a
+*.xml
+
+lib/
+.app/

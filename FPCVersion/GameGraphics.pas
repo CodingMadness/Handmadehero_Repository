@@ -34,7 +34,7 @@ interface
 
   implementation
     {PRIVATE}
-    function CreatePixel(const r,g,b: integer): TPixel; //<---- assignment not correct, look into it soon!
+    function CreatePixel(const r,g,b: integer): TPixel; //<---- TODO(Shpend): assignment not correct, look into it soon!
     begin
       {Assignment based on the endianess of the underlying machine}
       result.PADDING := 0;
