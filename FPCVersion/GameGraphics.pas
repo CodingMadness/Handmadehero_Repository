@@ -1,23 +1,26 @@
 ﻿unit GameGraphics;
 
 {$modeswitch advancedrecords}
+{$mode objfpc}
 
 interface
-  uses Windows, sysutils, GameWindow;
+  uses Windows, sysutils, GameWindow, helper;
 
   const PIXELSIZE = 4;
 
   type
     TPixel = record
+     //DO NOT CHANGE THE ORDER,TO MAINTAIN PROPER ENDIAN REPRESENTATION!
       Blue, Green, Red, PADDING: Byte;
     end;
+
+    TColor = (Red=0, Green=7, Blue=15, Yellow=31);
 
     PPixel = ^TPixel;
 
     TTotalPixelByteLength = 0..(High(TWindowArea) * PIXELSIZE);
 
     TPixelBuffer = record
-    public
       INFO: BITMAPINFO;
       Content: PPixel;
       Width: TMaxWidth;
@@ -29,7 +32,7 @@ interface
     PPixelBuffer = ^TPixelBuffer;
 
   procedure CreateWindowSizedBuffer(const pixelBuffer: PPixelBuffer; const width: TMaxWidth; const height: TMaxHeight);
-  procedure WritePixelsToBuffer(const pixelBuffer: PPixelBuffer; const xOffset, yOffset: integer);
+  procedure WritePixelsToBuffer(const pixelBuffer: PPixelBuffer);
   procedure DrawPixelBuffer(const phdc: HDC; const pixelBuffer: PPixelBuffer; const gameWindowWidth:TMaxWidth; gameWindowHeight: TMaxHeight);
 
   implementation
@@ -76,34 +79,77 @@ interface
 
 
     {PUBLIC}
-    procedure CreateWindowSizedBuffer(const pixelBuffer: PPixelBuffer; const width: TMaxWidth; const height: TMaxHeight);
+    procedure CreateWindowSizedBuffer(const pixelBuffer: PPixelBuffer;
+                                      const width: TMaxWidth; const height: TMaxHeight);
     begin
       FreePixelBufferIfNeedBe(pixelBuffer);
       DefineBitmapLayout(pixelBuffer, width, height);
       AllocatePixelBuffer(pixelBuffer, width, height);
     end;
 
-    procedure WritePixelsToBuffer(const pixelBuffer: PPixelBuffer; const xOffset, yOffset: integer);
-    var
-      rowNr, columnNr: integer;
-      currentRow, currentColumn: PPixel;
-    begin
-      currentRow := pixelBuffer^.Content;
 
-      for columnNr := 0 to (pixelBuffer^.Height - 1) do
-      begin
-        currentColumn := currentRow;
+    procedure WritePixelsToBuffer(const pixelBuffer: PPixelBuffer);
+        procedure Write_N_RowsOfColor(rndColor: TColor; const rowsPerColor: integer;
+                                      yOffset: integer;  xyPixel, nextRow: PPixel);
+        var
+          purePixel: TPixel = (Blue:0; Green:0; Red:0; PADDING:0);
 
-        for rowNr := 0 to (pixelBuffer^.Width - 1) do
+        const
+          maxRowCountPerProc: integer = 0;
+          xOffset: integer = 0;
+
         begin
-          currentColumn^ := CreatePixel(255,0 ,0);
-          currentColumn += 1; //move pixelpointer to the right by sizeof(TPixel);
+          //check if this procedure gets called for the first time,
+          //since yOffset is only 0 at the very beginning!;
+          if yOffset = 0 then
+          begin
+            nextRow := pixelBuffer^.Content; //start at: row--->{0;0}
+            maxRowCountPerProc := rowsPerColor-1; //rowsPerColor-1 because we start from 0, so 0..max-1
+            xOffset := 0;
+          end
+
+          else if yOffset > 0 then
+          begin
+           maxRowCountPerProc += rowsPerColor;
+          end;
+
+          case rndColor of
+            Red:    purePixel := CreatePixel(255, 0, 0);
+            Green:  purePixel := CreatePixel(0, 255, 0);
+            Blue:   purePixel := CreatePixel(0, 0, 255);
+            Yellow: purePixel := CreatePixel(230, 255, 0)
+            else
+              purePixel := CreatePixel(255, 255, 255);
+          end;
+
+         //column loop
+         while yOffset <= maxRowCountPerProc do
+         begin
+          xyPixel := nextRow;
+
+          //row loop
+          while xOffset <= (pixelBuffer^.Width - 1) do
+          begin
+            xyPixel^ := purePixel;  //SIGSEGV at the 3. recursive call
+            xyPixel += 1;
+            xOffset += 1;
+          end;
+            yOffset += 1;
+            xOffset := 0;
+            nextRow += pixelBuffer^.Width;
+         end;
+
+         //TODO(Shpend): add some random computation to get a more random color
+         //OR: add some code logic to check when to draw x-lines of y-color
+         rndColor := blue;
+
+         if yOffset <= 200 then
+           Write_N_RowsOfColor(rndColor, rowsPerColor, yOffset, xyPixel, nextRow);
         end;
-
-        currentRow += pixelBuffer^.Width;
-      end;
-
+    begin
+      Write_N_RowsOfColor(Red, 3, 0, nil, nil);  //shall color the first 3 rows in pure red
     end;
+
 
     procedure DrawPixelBuffer(const phdc: HDC; const pixelBuffer: PPixelBuffer; const gameWindowWidth: TMaxWidth; gameWindowHeight: TMaxHeight);
     begin

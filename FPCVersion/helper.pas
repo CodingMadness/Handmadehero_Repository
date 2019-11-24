@@ -35,6 +35,8 @@ interface
        millisecondsPerFrame, framesPerSecond, ClocksPerSecond: TLargeInteger;
       end;
 
+      TPixelCount = integer;
+
      function GetFunctionReturnMessage(const code: HRESULT): TCallReturnMessage;
      procedure PrintOperationsState(const currState: PAfterOperationData);
 

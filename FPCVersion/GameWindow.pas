@@ -63,6 +63,7 @@
             WM_SIZE:
             begin
               CreateWindowSizedBuffer(@WIN32_BITMAPBUFFER, 1200, 800);
+              //WritePixelsToBuffer(@WIN32_BITMAPBUFFER); // just a small test
             end;
 
             WM_QUIT: RUNNING := false;
@@ -83,7 +84,7 @@
             WM_PAINT:
             begin
               ONE_DC := BeginPaint(processID, @paintobj);
-              WritePixelsToBuffer(@WIN32_BITMAPBUFFER, 0, 0);
+              WritePixelsToBuffer(@WIN32_BITMAPBUFFER);
               GetClientRect(processID, OUTPUT_GAMEWINDOW);
               DrawPixelBuffer(ONE_DC, @WIN32_BITMAPBUFFER, OUTPUT_GAMEWINDOW.Width, OUTPUT_GAMEWINDOW.Height);
               EndPaint(processID, @paintobj);
@@ -157,7 +158,7 @@
 
           WriteSamplesToSoundBuffer(@ONE_SOUNDBUFFER);
 
-          WritePixelsToBuffer(@WIN32_BITMAPBUFFER, x, y);
+          //WritePixelsToBuffer(@WIN32_BITMAPBUFFER, x, y);
           DrawPixelBuffer(ONE_DC, @WIN32_BITMAPBUFFER, TMaxWidth(OUTPUT_GAMEWINDOW.Width), TMaxHeight(OUTPUT_GAMEWINDOW.Height));
 
           x+=3; y+=2;
