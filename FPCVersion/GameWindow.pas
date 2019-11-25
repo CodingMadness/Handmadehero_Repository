@@ -1,5 +1,6 @@
 ﻿unit GameWindow;
 
+{$mode objfpc}
   interface
       uses windows;
 
@@ -15,7 +16,21 @@
       type
         TMaxWidth  =  MIN_WIDTH..MAX_WIDTH;
         TMaxHeight =  MIN_HEIGHT..MAX_HEIGHT;
+
+        THeightRange = 0..MAX_HEIGHT-1;
+        TWidthRange  = 0..MAX_WIDTH-1;
+
         TWindowArea = MIN_WIDTH * MIN_HEIGHT..MAX_WIDTH * MAX_HEIGHT;
+
+        TTestENum = (a=4, b=8, c=16, d=32);
+
+        {
+        TMaxRowsPerColor = record
+          case color: GameGraphics.TColor of
+            Red:;
+        end;
+        }
+
 
       procedure CreateWindowObject(var toAlloc: PWNDCLASSA);
       function RegisterWindow(const wnd: PWNDCLASSA): boolean;
@@ -84,7 +99,7 @@
             WM_PAINT:
             begin
               ONE_DC := BeginPaint(processID, @paintobj);
-              WritePixelsToBuffer(@WIN32_BITMAPBUFFER);
+              WritePixelsToBuffer(@WIN32_BITMAPBUFFER, 100, Green);
               GetClientRect(processID, OUTPUT_GAMEWINDOW);
               DrawPixelBuffer(ONE_DC, @WIN32_BITMAPBUFFER, OUTPUT_GAMEWINDOW.Width, OUTPUT_GAMEWINDOW.Height);
               EndPaint(processID, @paintobj);
@@ -138,11 +153,13 @@
 
       procedure StartGameLoop;
       var
-        x, y: integer;
+        x: integer;
+        color1: TColor;
       begin
         RUNNING := true;
         x := 0;
-        y := 0;
+
+        color1 := low(color1);
 
         if EnableSoundProcessing(ONE_GAMEHWND) then
         begin
@@ -150,7 +167,7 @@
           PlayTheSoundBuffer(@ONE_SOUNDBUFFER);
         end;
 
-        StartSpeedMeasureBeforeGameLogicBegins;
+        //StartSpeedMeasureBeforeGameLogicBegins;
 
         while RUNNING do
         begin
@@ -158,12 +175,16 @@
 
           WriteSamplesToSoundBuffer(@ONE_SOUNDBUFFER);
 
-          //WritePixelsToBuffer(@WIN32_BITMAPBUFFER, x, y);
+          WritePixelsToBuffer(@WIN32_BITMAPBUFFER, x, color1);
           DrawPixelBuffer(ONE_DC, @WIN32_BITMAPBUFFER, TMaxWidth(OUTPUT_GAMEWINDOW.Width), TMaxHeight(OUTPUT_GAMEWINDOW.Height));
 
-          x+=3; y+=2;
+          x+=2; //mod 3;
+          color1 := TColor(byte(color1) shl 1);
 
-          StartSpeedMeasureAfterLoopGameLogicEnd;
+          if color1 = high(color1) then
+            color1 := low(color1);
+
+          //StartSpeedMeasureAfterLoopGameLogicEnd;
 
           //OutputAllSpeedMeasurements;
         end;

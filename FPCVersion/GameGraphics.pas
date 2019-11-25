@@ -14,7 +14,8 @@ interface
       Blue, Green, Red, PADDING: Byte;
     end;
 
-    TColor = (Red=0, Green=7, Blue=15, Yellow=31);
+    {Little Endian bit-order from Right -> Left (start: 2^0 -> end: 2^7)}
+    TColor = (Red=4, Green=byte(Red) shl 1, Blue=byte(Green) shl 1, Yellow=byte(Blue) shl 1);
 
     PPixel = ^TPixel;
 
@@ -31,8 +32,13 @@ interface
 
     PPixelBuffer = ^TPixelBuffer;
 
+    TMaxRowsPerColor = record
+      //...
+    end;
+
+
   procedure CreateWindowSizedBuffer(const pixelBuffer: PPixelBuffer; const width: TMaxWidth; const height: TMaxHeight);
-  procedure WritePixelsToBuffer(const pixelBuffer: PPixelBuffer);
+  procedure WritePixelsToBuffer(const pixelBuffer: PPixelBuffer; const rowsPerColor: integer; const color: TColor);
   procedure DrawPixelBuffer(const phdc: HDC; const pixelBuffer: PPixelBuffer; const gameWindowWidth:TMaxWidth; gameWindowHeight: TMaxHeight);
 
   implementation
@@ -88,24 +94,25 @@ interface
     end;
 
 
-    procedure WritePixelsToBuffer(const pixelBuffer: PPixelBuffer);
-        procedure Write_N_RowsOfColor(rndColor: TColor; const rowsPerColor: integer;
-                                      yOffset: integer;  xyPixel, nextRow: PPixel);
+    procedure WritePixelsToBuffer(const pixelBuffer: PPixelBuffer; const rowsPerColor: integer; const color: TColor);
+        procedure Write_N_RowsOfColor(rndColor: TColor; const rowsPerColor: TMaxHeight);
         var
           purePixel: TPixel = (Blue:0; Green:0; Red:0; PADDING:0);
 
         const
-          maxRowCountPerProc: integer = 0;
+          maxRowCountPerProc: THeightRange = 0;
           xOffset: integer = 0;
+          yOffset: integer = 0;
+          currCell: PPixel = nil;
+          nextRow: PPixel = nil;
 
         begin
           //check if this procedure gets called for the first time,
-          //since yOffset is only 0 at the very beginning!;
+          //since "yOffset" is only 0 at the very beginning!;
           if yOffset = 0 then
           begin
             nextRow := pixelBuffer^.Content; //start at: row--->{0;0}
             maxRowCountPerProc := rowsPerColor-1; //rowsPerColor-1 because we start from 0, so 0..max-1
-            xOffset := 0;
           end
 
           else if yOffset > 0 then
@@ -118,36 +125,27 @@ interface
             Green:  purePixel := CreatePixel(0, 255, 0);
             Blue:   purePixel := CreatePixel(0, 0, 255);
             Yellow: purePixel := CreatePixel(230, 255, 0)
-            else
-              purePixel := CreatePixel(255, 255, 255);
           end;
 
          //column loop
-         while yOffset <= maxRowCountPerProc do
+         while (yOffset <= maxRowCountPerProc) and (yOffset < pixelBuffer^.Height) do
          begin
-          xyPixel := nextRow;
+          currCell := nextRow;
 
           //row loop
           while xOffset <= (pixelBuffer^.Width - 1) do
           begin
-            xyPixel^ := purePixel;  //SIGSEGV at the 3. recursive call
-            xyPixel += 1;
+            currCell^ := purePixel;
+            currCell += 1;
             xOffset += 1;
           end;
             yOffset += 1;
             xOffset := 0;
             nextRow += pixelBuffer^.Width;
          end;
-
-         //TODO(Shpend): add some random computation to get a more random color
-         //OR: add some code logic to check when to draw x-lines of y-color
-         rndColor := blue;
-
-         if yOffset <= 200 then
-           Write_N_RowsOfColor(rndColor, rowsPerColor, yOffset, xyPixel, nextRow);
         end;
     begin
-      Write_N_RowsOfColor(Red, 3, 0, nil, nil);  //shall color the first 3 rows in pure red
+      Write_N_RowsOfColor(color, rowsPerColor);  //shall color the first 3 rows in pure red
     end;
 
 

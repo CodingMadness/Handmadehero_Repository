@@ -75,7 +75,7 @@ implementation
       msgBuf := nil;
     end;
 
-    procedure WriteEmptyLines(const newLineCount: DWORD);
+    procedure Write_EmptyLines(const newLineCount: DWORD);
     var start: DWORD;
     begin
       for start := 0 to newLineCount do
@@ -83,7 +83,7 @@ implementation
     end;
 
     {$Region PRIVATE SECTION}
-    procedure WriteCallCountToTextBuffer(const info: PAfterOperationData; const call: TOperationName);
+    procedure Write_CallCountToTextBuffer(const info: PAfterOperationData; const call: TOperationName);
     begin
       TextColor(127);
       write('Current number of ', '[',call,']', ' calls:          ');      {
@@ -96,7 +96,7 @@ implementation
       writeln;
     end;
 
-    procedure WriteSuccessToTextBuffer(const info: PAfterOperationData; const call: TOperationName);
+    procedure Write_WasSuccessToTextBuffer(const info: PAfterOperationData; const call: TOperationName);
     begin
       write('Did the current : ' , '[',call,']', ' succeed?:       '); {
                                                                         7chars extra space to be correctly aligned with the rest
@@ -108,7 +108,7 @@ implementation
       writeln;
     end;
 
-    procedure WriteCallMessageToTextBuffer(const info: PAfterOperationData; const call: TOperationName);
+    procedure Write_CallMessageToTextBuffer(const info: PAfterOperationData; const call: TOperationName);
     begin
       write('Result Message of:                       '); //20char extra space!
 
@@ -122,7 +122,7 @@ implementation
       TextColor(White);
     end;
 
-    procedure WriteSucceededUntilNowToTextBuffer(const info: PAfterOperationData; const call: TOperationName);
+    procedure Write_SucceededUntilNowToTextBuffer(const info: PAfterOperationData; const call: TOperationName);
     begin
      write('Count of succeeded ', '[', call, 'S', ']', ' until now:    ');{
                                                                              4chars extra space to be correctly aligned with the rest
@@ -134,7 +134,7 @@ implementation
      TextColor(White);
     end;
 
-    procedure WriteFailedUntilNowToTextBuffer(const info: PAfterOperationData; const call: TOperationName);
+    procedure Write_FailedUntilNowToTextBuffer(const info: PAfterOperationData; const call: TOperationName);
     begin
      write('Count of failed ', '[', call, 'S', ']', ' until now:       '); {
                                                                              7chars extra space to be correctly aligned with the rest
@@ -154,15 +154,15 @@ implementation
       case currState^.currentOperation.IsOperationLocking of
         YES:          currentOperation := 'LOCK';
         NO:           currentOperation := 'UNLOCK';
-        UNDEFINED:    currentOperation := 'NOCALL';
+        UNDEFINED:    currentOperation := 'NOCALLWEREMADE';
       end;
 
-      WriteCallCountToTextBuffer(currState, currentOperation);
-      WriteSuccessToTextBuffer(currState, currentOperation);
-      WriteCallMessageToTextBuffer(currState, currentOperation);
-      WriteSucceededUntilNowToTextBuffer(currState, currentOperation);
-      WriteFailedUntilNowToTextBuffer(currState, currentOperation);
-      WriteEmptyLines(2);
+      Write_CallCountToTextBuffer(currState, currentOperation);
+      Write_WasSuccessToTextBuffer(currState, currentOperation);
+      Write_CallMessageToTextBuffer(currState, currentOperation);
+      Write_SucceededUntilNowToTextBuffer(currState, currentOperation);
+      Write_FailedUntilNowToTextBuffer(currState, currentOperation);
+      Write_EmptyLines(2);
     end;
 
     procedure StartSpeedMeasureOnProgramStartup;
