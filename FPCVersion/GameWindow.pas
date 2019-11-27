@@ -22,16 +22,6 @@
 
         TWindowArea = MIN_WIDTH * MIN_HEIGHT..MAX_WIDTH * MAX_HEIGHT;
 
-        TTestENum = (a=4, b=8, c=16, d=32);
-
-        {
-        TMaxRowsPerColor = record
-          case color: GameGraphics.TColor of
-            Red:;
-        end;
-        }
-
-
       procedure CreateWindowObject(var toAlloc: PWNDCLASSA);
       function RegisterWindow(const wnd: PWNDCLASSA): boolean;
       function DrawWindow(const wndObj: PWNDCLASSA): HWND;
@@ -99,7 +89,7 @@
             WM_PAINT:
             begin
               ONE_DC := BeginPaint(processID, @paintobj);
-              WritePixelsToBuffer(@WIN32_BITMAPBUFFER, 100, Green);
+              WritePixelsToBuffer(@WIN32_BITMAPBUFFER, 100, tcGreen);
               GetClientRect(processID, OUTPUT_GAMEWINDOW);
               DrawPixelBuffer(ONE_DC, @WIN32_BITMAPBUFFER, OUTPUT_GAMEWINDOW.Width, OUTPUT_GAMEWINDOW.Height);
               EndPaint(processID, @paintobj);
@@ -154,12 +144,12 @@
       procedure StartGameLoop;
       var
         x: integer;
-        color1: TColor;
+        currColor: TColor;
       begin
         RUNNING := true;
         x := 0;
 
-        color1 := low(color1);
+        currColor := low(currColor);
 
         if EnableSoundProcessing(ONE_GAMEHWND) then
         begin
@@ -175,14 +165,12 @@
 
           WriteSamplesToSoundBuffer(@ONE_SOUNDBUFFER);
 
-          WritePixelsToBuffer(@WIN32_BITMAPBUFFER, x, color1);
+          WritePixelsToBuffer(@WIN32_BITMAPBUFFER, x, currColor);
           DrawPixelBuffer(ONE_DC, @WIN32_BITMAPBUFFER, TMaxWidth(OUTPUT_GAMEWINDOW.Width), TMaxHeight(OUTPUT_GAMEWINDOW.Height));
 
-          x+=2; //mod 3;
-          color1 := TColor(byte(color1) shl 1);
+          x+= byte(currColor) shl 1;
 
-          if color1 = high(color1) then
-            color1 := low(color1);
+          currColor := GetRndColor;
 
           //StartSpeedMeasureAfterLoopGameLogicEnd;
 

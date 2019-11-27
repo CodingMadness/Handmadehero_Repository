@@ -1,5 +1,6 @@
 unit Helper;
-{$mode objfpc}{$H+}
+{$mode objfpc}
+{$H+}
 
 interface
     uses
@@ -37,8 +38,23 @@ interface
 
       TPixelCount = integer;
 
+
+      {Little Endian bit-order from Right -> Left (start: 2^0 -> end: 2^7)}
+      {$PACKENUM 2} //TColormaxvalue=255(1byte)
+      TColor = (
+                  tcRed    = 16,
+                  tcGreen  = byte(tcRed)   shl 1,
+                  tcBlue   = byte(tcGreen) shl 1,
+                  tcYellow = byte(tcBlue)  shl 1
+                  //tcCyan   = (byte(tcYellow)shl 1)-1  //256
+                  //tcPurple = byte(tcCyan) shl 1
+                );
+
+     TColorSet = set of TColor;
+
      function GetFunctionReturnMessage(const code: HRESULT): TCallReturnMessage;
      procedure PrintOperationsState(const currState: PAfterOperationData);
+     function GetRndColor: TColor;
 
      procedure StartSpeedMeasureOnProgramStartup;
      procedure StartSpeedMeasureBeforeGameLogicBegins;
@@ -48,6 +64,96 @@ interface
 implementation
     var
       ONE_PERFORMANCEMEASURETOOL: TPerformanceMeasure;
+
+
+    function xor128_RNG: QWord;
+    const
+      seed_x:QWord=123456789;
+      seed_y:QWord=362436069;
+      seed_z:QWord=521288629;
+      seed_w:QWord=88675123;
+    var
+      t: QWord;
+    begin
+       t := (seed_x xor (seed_x shl 11));
+       seed_x := seed_y;
+       seed_Y := seed_z;
+       seed_z := seed_w;
+       seed_w := (seed_w xor (seed_w shr 19)) xor (t xor (t shr 8));
+       result := seed_w;
+    end;
+
+
+    function GetRndColor: TColor;
+    label While_Loop;
+    const
+      func_callNr: QWord = 0;
+    var
+      rng: QWord;
+      onebyteFrom16byte: PByte;
+      currColor, nextColor: TColor;
+      loopIndex, maxIndex: uint16;
+      distance1, distance2: Int16;
+      mostRNDColor: TColorset;
+      stillClosestColor: boolean;
+    begin
+       rng := xor128_RNG;
+       onebyteFrom16byte := PByte(@rng) + func_callNr;
+
+       {if onebyteFrom16byte^ is even and this function got called 3 times divied it by2, to make a bit more randomness happen}
+       if ((onebyteFrom16byte^ and 1) = 0) and
+          (onebyteFrom16byte^ >= 150)    and
+          (func_callNr = 3)              then
+         onebyteFrom16byte^ := onebyteFrom16byte^ shr 1;
+
+       currColor := low(TColor);
+       nextColor := currColor;
+       maxIndex  := ord(high(TColor));
+       loopIndex := ord(currColor);
+       distance1 := onebyteFrom16byte^ - Byte(currColor);
+       stillClosestColor := false;
+       mostRNDColor := [];
+
+       {maxIndex =255 so loop never returns, but +1 makes it even in 2^complent and loop will return;}
+       while_Loop:
+       begin
+         if loopIndex < maxIndex then
+         begin
+           nextColor := TColor(ord(nextColor)*2);
+           distance2 := onebyteFrom16byte^ - Byte(nextColor);
+
+           if distance2 < 0 then
+             distance2 *= -1;
+
+           if (distance1 < 0)  then
+             distance1 *= -1;
+
+           {clear <mostRNDColor> when another color with closer range to the 1byte of the 16byte value were found}
+           if (distance1 < distance2) and (not stillClosestColor)  then
+           begin
+             mostRNDColor:= [];
+             mostRNDColor += [currColor];
+             stillClosestColor := distance1 < distance2;
+           end
+
+           {clear <mostRNDColor> when another color with closer range to the 1byte of the 16byte value were found}
+           else if not stillClosestColor then
+           begin
+             mostRNDColor:= [];
+             mostRNDColor += [nextColor];
+             distance1 := distance2;
+             stillClosestColor := false;
+             currColor := nextColor;
+           end;
+           loopIndex *= 2;
+
+           goto While_Loop;
+         end;
+       end;
+
+       func_callNr += 1;
+       result := TColor(currColor);
+    end;
 
 
     function _rdtsc: QWORD; assembler;
@@ -110,7 +216,7 @@ implementation
 
     procedure Write_CallMessageToTextBuffer(const info: PAfterOperationData; const call: TOperationName);
     begin
-      write('Result Message of:                       '); //20char extra space!
+      write('Result Message of : call:', call, '                       '); //20char extra space!
 
       if info^.currentOperation.IsOperationAlsoSuccessFul then
         TextColor(Green)
@@ -149,7 +255,7 @@ implementation
 
     procedure PrintOperationsState(const currState: PAfterOperationData);
     var
-     currentOperation: string[6];
+     currentOperation: string[15];
     begin
       case currState^.currentOperation.IsOperationLocking of
         YES:          currentOperation := 'LOCK';

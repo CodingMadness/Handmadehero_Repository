@@ -14,9 +14,6 @@ interface
       Blue, Green, Red, PADDING: Byte;
     end;
 
-    {Little Endian bit-order from Right -> Left (start: 2^0 -> end: 2^7)}
-    TColor = (Red=4, Green=byte(Red) shl 1, Blue=byte(Green) shl 1, Yellow=byte(Blue) shl 1);
-
     PPixel = ^TPixel;
 
     TTotalPixelByteLength = 0..(High(TWindowArea) * PIXELSIZE);
@@ -31,10 +28,6 @@ interface
     end;
 
     PPixelBuffer = ^TPixelBuffer;
-
-    TMaxRowsPerColor = record
-      //...
-    end;
 
 
   procedure CreateWindowSizedBuffer(const pixelBuffer: PPixelBuffer; const width: TMaxWidth; const height: TMaxHeight);
@@ -96,21 +89,25 @@ interface
 
     procedure WritePixelsToBuffer(const pixelBuffer: PPixelBuffer; const rowsPerColor: integer; const color: TColor);
         procedure Write_N_RowsOfColor(rndColor: TColor; const rowsPerColor: TMaxHeight);
+        label FIRSTTIME;
         var
           purePixel: TPixel = (Blue:0; Green:0; Red:0; PADDING:0);
 
         const
           maxRowCountPerProc: THeightRange = 0;
-          xOffset: integer = 0;
-          yOffset: integer = 0;
+          xOffset: TWidthRange = 0;
+          yOffset: THeightRange = 0;
           currCell: PPixel = nil;
           nextRow: PPixel = nil;
 
         begin
           //check if this procedure gets called for the first time,
           //since "yOffset" is only 0 at the very beginning!;
+          FIRSTTIME:
           if yOffset = 0 then
           begin
+            xOffset := 0;
+            yOffset := 0;
             nextRow := pixelBuffer^.Content; //start at: row--->{0;0}
             maxRowCountPerProc := rowsPerColor-1; //rowsPerColor-1 because we start from 0, so 0..max-1
           end
@@ -121,29 +118,39 @@ interface
           end;
 
           case rndColor of
-            Red:    purePixel := CreatePixel(255, 0, 0);
-            Green:  purePixel := CreatePixel(0, 255, 0);
-            Blue:   purePixel := CreatePixel(0, 0, 255);
-            Yellow: purePixel := CreatePixel(230, 255, 0)
+            tcRed:    purePixel := CreatePixel(255, 0, 0);
+            tcGreen:  purePixel := CreatePixel(0, 255, 0);
+            tcBlue:   purePixel := CreatePixel(0, 0, 255);
+            tcYellow: purePixel := CreatePixel(230, 255, 0)
           end;
 
          //column loop
-         while (yOffset <= maxRowCountPerProc) and (yOffset < pixelBuffer^.Height) do
-         begin
-          currCell := nextRow;
-
-          //row loop
-          while xOffset <= (pixelBuffer^.Width - 1) do
+          while (yOffset <= maxRowCountPerProc) do
           begin
-            currCell^ := purePixel;
-            currCell += 1;
-            xOffset += 1;
+            //check if the yOffset is still in bounds with the total buffer height,
+            //since maxRowCountPerProc can be greater due to the fact that it wont stop at the maxsize of the buffer,
+            //which is a pre calculated one, he stops only at the const max height I have set, so he ignores the buffers bounds!
+            if (yOffset < pixelBuffer^.Height) then
+            begin
+              currCell := nextRow;
+
+              //row loop
+              while xOffset <= (pixelBuffer^.Width - 1) do
+              begin
+                currCell^ := purePixel;
+                currCell += 1;
+                xOffset += 1;
+              end;
+                yOffset += 1;
+                xOffset := 0;
+                nextRow += pixelBuffer^.Width;
+            end
+
+            else
+              goto FIRSTTIME;
           end;
-            yOffset += 1;
-            xOffset := 0;
-            nextRow += pixelBuffer^.Width;
-         end;
-        end;
+       end;
+
     begin
       Write_N_RowsOfColor(color, rowsPerColor);  //shall color the first 3 rows in pure red
     end;
