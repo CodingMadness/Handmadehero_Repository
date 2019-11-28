@@ -38,16 +38,18 @@ interface
 
       TPixelCount = integer;
 
-
       {Little Endian bit-order from Right -> Left (start: 2^0 -> end: 2^7)}
-      {$PACKENUM 2} //TColormaxvalue=255(1byte)
+      {$PACKENUM 1}
       TColor = (
-                  tcRed    = 16,
-                  tcGreen  = byte(tcRed)   shl 1,
-                  tcBlue   = byte(tcGreen) shl 1,
-                  tcYellow = byte(tcBlue)  shl 1
-                  //tcCyan   = (byte(tcYellow)shl 1)-1  //256
-                  //tcPurple = byte(tcCyan) shl 1
+                  //Q: How many bits I need to <shr> in order to get the firstColor of TInternalColor
+                  tcRed = 1,    //0000 0001  => 1 shr 4 = 16
+                  tcGreen=2,    //0000 0010  => 2 shr 4 = 32
+                  tcBlue,       //0000 0011  => 3 shr 4 = 48  + TColor[0]
+                  tcYellow,     //0000 0100  => 4 shr 4 = 64
+                  tcCyan,       //0000 0101  => 5 shr 4 = 80  + TColor[4]
+                  tcPurple,     //0000 0110  => 6 shr 4 = 96
+                  tcGrey,       //0000 0111
+                  tcBrown       //0000 1000
                 );
 
      TColorSet = set of TColor;
@@ -85,75 +87,118 @@ implementation
 
 
     function GetRndColor: TColor;
-    label While_Loop;
+    type
+     {$PackEnum 2}
+     TInternalColor = (
+                  tIRed = 16,
+                  tIGreen = 32,
+                  tIBlue = 64,     //miss!
+                  tIYellow = 128,
+                  tICyan = 256,    //miss!
+                  tIPurple = 512, //miss!
+                  tIGrey = 1024, //miss!
+                  tIBrown = 2048
+                );
+     TInternalColorInfo = record
+       currColor, nextColor: TInternalColor;
+       isCurrColorClosest: boolean;
+       mappedPosForTColor, tcolorPos: byte;
+     end;
+
     const
-      func_callNr: QWord = 0;
+      bitshiftPos: byte = 0;
+      func_callNr: byte = 0;
+      MAXBYTELEN_OF_RNDVALUE = 16;
     var
       rng: QWord;
       onebyteFrom16byte: PByte;
-      currColor, nextColor: TColor;
       loopIndex, maxIndex: uint16;
-      distance1, distance2: Int16;
+      distanceToCurrcolor, distanceToNextcolor: Int16;
       mostRNDColor: TColorset;
-      stillClosestColor: boolean;
+      firstColor, lastColor: TInternalColor;
+      currColorInfo: TInternalColorInfo;
     begin
+       {$region RNG code}
        rng := xor128_RNG;
+
+       if func_callNr >= MAXBYTELEN_OF_RNDVALUE then
+       begin
+         func_callNr := 0;
+         bitshiftPos := bitshiftPos div 2;
+         rng := xor128_RNG xor (rng shr bitshiftPos);
+       end;
+
        onebyteFrom16byte := PByte(@rng) + func_callNr;
 
-       {if onebyteFrom16byte^ is even and this function got called 3 times divied it by2, to make a bit more randomness happen}
+       {  if onebyteFrom16byte^ is even and this function got called 3 times, divide it by 2,
+          to mamappedPoske a bit more randomness happen
+       }
        if ((onebyteFrom16byte^ and 1) = 0) and
-          (onebyteFrom16byte^ >= 150)    and
-          (func_callNr = 3)              then
+          (onebyteFrom16byte^ >= 150)      and
+          (func_callNr = 2)                then
          onebyteFrom16byte^ := onebyteFrom16byte^ shr 1;
+       {$EndRegion RNG code}
 
-       currColor := low(TColor);
-       nextColor := currColor;
-       maxIndex  := ord(high(TColor));
-       loopIndex := ord(currColor);
-       distance1 := onebyteFrom16byte^ - Byte(currColor);
-       stillClosestColor := false;
-       mostRNDColor := [];
-
-       {maxIndex =255 so loop never returns, but +1 makes it even in 2^complent and loop will return;}
-       while_Loop:
+       {$Region ALGORITHM BASED PROPER INITIALIZATION}
+       with currColorInfo do
        begin
-         if loopIndex < maxIndex then
+         firstColor := low(TInternalColor);
+         lastColor := high(TInternalColor);
+
+         currColor := firstColor;
+         nextColor := firstColor;
+
+         isCurrColorClosest := false;
+         mappedPosForTColor := 1;
+         tcolorPos := 1;
+
+         maxIndex  := ord(lastColor);
+         loopIndex := ord(firstColor);
+
+         distanceToCurrcolor := onebyteFrom16byte^ - uint16(firstColor);
+         mostRNDColor := [];
+       {$EndRegion}
+
+       while loopIndex < maxIndex do
+       begin
+         nextColor := TInternalColor(ord(nextColor)*2);
+         distanceToNextcolor := onebyteFrom16byte^ - uint16(nextColor);
+
+         if distanceToNextcolor < 0 then
+           distanceToNextcolor *= -1;
+
+         if (distanceToCurrcolor < 0)  then
+           distanceToCurrcolor *= -1;
+
+         {clear <mostRNDColor> when another color with closer range to the 1byte of the 16byte value were found}
+         if (distanceToCurrcolor < distanceToNextcolor) and (not isCurrColorClosest)  then
          begin
-           nextColor := TColor(ord(nextColor)*2);
-           distance2 := onebyteFrom16byte^ - Byte(nextColor);
+           mostRNDColor:= [];
+           //mappedPosForTColor += 1;
+           mostRNDColor += [TColor(tcolorPos)];
+           isCurrColorClosest := distanceToCurrcolor < distanceToNextcolor;
+         end
 
-           if distance2 < 0 then
-             distance2 *= -1;
+         {clear <mostRNDColor> when another color with closer range to the 1byte of the 16byte value were found}
+         else if not isCurrColorClosest then
+         begin
+           mostRNDColor:= [];
+           currColor := nextColor;
+           mappedPosForTColor += 1;
+           mostRNDColor += [TColor(mappedPosForTColor)];
+           distanceToCurrcolor := distanceToNextcolor;
+           isCurrColorClosest := false;
+         end;
 
-           if (distance1 < 0)  then
-             distance1 *= -1;
-
-           {clear <mostRNDColor> when another color with closer range to the 1byte of the 16byte value were found}
-           if (distance1 < distance2) and (not stillClosestColor)  then
-           begin
-             mostRNDColor:= [];
-             mostRNDColor += [currColor];
-             stillClosestColor := distance1 < distance2;
-           end
-
-           {clear <mostRNDColor> when another color with closer range to the 1byte of the 16byte value were found}
-           else if not stillClosestColor then
-           begin
-             mostRNDColor:= [];
-             mostRNDColor += [nextColor];
-             distance1 := distance2;
-             stillClosestColor := false;
-             currColor := nextColor;
-           end;
-           loopIndex *= 2;
-
-           goto While_Loop;
+         loopIndex *= 2;
+         tcolorPos += 1;
          end;
        end;
 
+       bitshiftPos += 1;
        func_callNr += 1;
-       result := TColor(currColor);
-    end;
+       result := TColor(currColorInfo.mappedPosForTColor);
+      end;
 
 
     function _rdtsc: QWORD; assembler;

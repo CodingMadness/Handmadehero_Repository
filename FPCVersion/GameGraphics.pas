@@ -114,14 +114,20 @@ interface
 
           else if yOffset > 0 then
           begin
-           maxRowCountPerProc += rowsPerColor;
+            maxRowCountPerProc += rowsPerColor;
           end;
 
           case rndColor of
             tcRed:    purePixel := CreatePixel(255, 0, 0);
             tcGreen:  purePixel := CreatePixel(0, 255, 0);
             tcBlue:   purePixel := CreatePixel(0, 0, 255);
-            tcYellow: purePixel := CreatePixel(230, 255, 0)
+            tcYellow: purePixel := CreatePixel(230, 255, 0);
+            tcPurple: purePixel := CreatePixel(150, 0, 100);
+            tcBrown:  purePixel := CreatePixel(255, 100, 0);
+            tcGrey:   purePixel := CreatePixel(0, 0, 0);
+
+            else       //random test evaluation.. remove later!
+              rndColor := tcBlue;
           end;
 
          //column loop

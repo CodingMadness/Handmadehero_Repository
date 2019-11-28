@@ -168,7 +168,7 @@
           WritePixelsToBuffer(@WIN32_BITMAPBUFFER, x, currColor);
           DrawPixelBuffer(ONE_DC, @WIN32_BITMAPBUFFER, TMaxWidth(OUTPUT_GAMEWINDOW.Width), TMaxHeight(OUTPUT_GAMEWINDOW.Height));
 
-          x+= byte(currColor) shl 1;
+          x+=1;
 
           currColor := GetRndColor;
 
