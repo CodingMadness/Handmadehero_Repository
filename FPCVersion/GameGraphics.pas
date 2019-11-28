@@ -92,14 +92,12 @@ interface
         label FIRSTTIME;
         var
           purePixel: TPixel = (Blue:0; Green:0; Red:0; PADDING:0);
-
         const
           maxRowCountPerProc: THeightRange = 0;
           xOffset: TWidthRange = 0;
           yOffset: THeightRange = 0;
           currCell: PPixel = nil;
           nextRow: PPixel = nil;
-
         begin
           //check if this procedure gets called for the first time,
           //since "yOffset" is only 0 at the very beginning!;
@@ -108,14 +106,12 @@ interface
           begin
             xOffset := 0;
             yOffset := 0;
-            nextRow := pixelBuffer^.Content; //start at: row--->{0;0}
+            nextRow := pixelBuffer^.Content;      //start at: row--->{0;0}
             maxRowCountPerProc := rowsPerColor-1; //rowsPerColor-1 because we start from 0, so 0..max-1
           end
 
           else if yOffset > 0 then
-          begin
             maxRowCountPerProc += rowsPerColor;
-          end;
 
           case rndColor of
             tcRed:    purePixel := CreatePixel(255, 0, 0);
@@ -125,9 +121,6 @@ interface
             tcPurple: purePixel := CreatePixel(150, 0, 100);
             tcBrown:  purePixel := CreatePixel(255, 100, 0);
             tcGrey:   purePixel := CreatePixel(0, 0, 0);
-
-            else       //random test evaluation.. remove later!
-              rndColor := tcBlue;
           end;
 
          //column loop

@@ -92,31 +92,29 @@ implementation
      TInternalColor = (
                   tIRed = 16,
                   tIGreen = 32,
-                  tIBlue = 64,     //miss!
+                  tIBlue = 64,
                   tIYellow = 128,
-                  tICyan = 256,    //miss!
-                  tIPurple = 512, //miss!
-                  tIGrey = 1024, //miss!
+                  tICyan = 256,
+                  tIPurple = 512,
+                  tIGrey = 1024,
                   tIBrown = 2048
                 );
-     TInternalColorInfo = record
-       currColor, nextColor: TInternalColor;
-       isCurrColorClosest: boolean;
-       mappedPosForTColor, tcolorPos: byte;
-     end;
 
     const
       bitshiftPos: byte = 0;
       func_callNr: byte = 0;
       MAXBYTELEN_OF_RNDVALUE = 16;
+      FIRSTCOLOR = low(TInternalColor);
+      LASTCOLOR = high(TInternalColor);
     var
       rng: QWord;
       onebyteFrom16byte: PByte;
-      loopIndex, maxIndex: uint16;
+      loopIndex, maxIndex: int16;             //this needs to be 2byte long!
+      mappedIndex, globalTColorIndex: byte;   //this is enough for 1byte
       distanceToCurrcolor, distanceToNextcolor: Int16;
       mostRNDColor: TColorset;
-      firstColor, lastColor: TInternalColor;
-      currColorInfo: TInternalColorInfo;
+      nextColor: TInternalColor;
+      isCurrColorClosest: boolean;
     begin
        {$region RNG code}
        rng := xor128_RNG;
@@ -140,29 +138,23 @@ implementation
        {$EndRegion RNG code}
 
        {$Region ALGORITHM BASED PROPER INITIALIZATION}
-       with currColorInfo do
-       begin
-         firstColor := low(TInternalColor);
-         lastColor := high(TInternalColor);
+       nextColor := TInternalColor(FIRSTCOLOR);
 
-         currColor := firstColor;
-         nextColor := firstColor;
+       mappedIndex := 1;
+       globalTColorIndex := 1;
+       isCurrColorClosest := false;
 
-         isCurrColorClosest := false;
-         mappedPosForTColor := 1;
-         tcolorPos := 1;
+       maxIndex  := ord(LASTCOLOR);
+       loopIndex := ord(FIRSTCOLOR);
 
-         maxIndex  := ord(lastColor);
-         loopIndex := ord(firstColor);
-
-         distanceToCurrcolor := onebyteFrom16byte^ - uint16(firstColor);
-         mostRNDColor := [];
+       distanceToCurrcolor := onebyteFrom16byte^ - Int16(FIRSTCOLOR);
+       mostRNDColor := [];
        {$EndRegion}
 
        while loopIndex < maxIndex do
        begin
          nextColor := TInternalColor(ord(nextColor)*2);
-         distanceToNextcolor := onebyteFrom16byte^ - uint16(nextColor);
+         distanceToNextcolor := onebyteFrom16byte^ - Int16(nextColor);
 
          if distanceToNextcolor < 0 then
            distanceToNextcolor *= -1;
@@ -174,8 +166,7 @@ implementation
          if (distanceToCurrcolor < distanceToNextcolor) and (not isCurrColorClosest)  then
          begin
            mostRNDColor:= [];
-           //mappedPosForTColor += 1;
-           mostRNDColor += [TColor(tcolorPos)];
+           mostRNDColor += [TColor(globalTColorIndex)];
            isCurrColorClosest := distanceToCurrcolor < distanceToNextcolor;
          end
 
@@ -183,21 +174,19 @@ implementation
          else if not isCurrColorClosest then
          begin
            mostRNDColor:= [];
-           currColor := nextColor;
-           mappedPosForTColor += 1;
-           mostRNDColor += [TColor(mappedPosForTColor)];
+           mappedIndex += 1;
+           mostRNDColor += [TColor(mappedIndex)];
            distanceToCurrcolor := distanceToNextcolor;
            isCurrColorClosest := false;
          end;
 
          loopIndex *= 2;
-         tcolorPos += 1;
-         end;
+         globalTColorIndex += 1;
        end;
 
        bitshiftPos += 1;
        func_callNr += 1;
-       result := TColor(currColorInfo.mappedPosForTColor);
+       result := TColor(mappedIndex);
       end;
 
 
