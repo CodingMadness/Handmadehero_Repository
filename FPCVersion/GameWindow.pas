@@ -89,7 +89,7 @@
             WM_PAINT:
             begin
               ONE_DC := BeginPaint(processID, @paintobj);
-              WritePixelsToBuffer(@WIN32_BITMAPBUFFER, 100, tcGreen);
+              //WritePixelsToBuffer(@WIN32_BITMAPBUFFER, 100, tcGreen);
               GetClientRect(processID, OUTPUT_GAMEWINDOW);
               DrawPixelBuffer(ONE_DC, @WIN32_BITMAPBUFFER, OUTPUT_GAMEWINDOW.Width, OUTPUT_GAMEWINDOW.Height);
               EndPaint(processID, @paintobj);
@@ -142,14 +142,14 @@
       end;
 
       procedure StartGameLoop;
+      const y = 5;
+
       var
         x: integer;
-        currColor: TColor;
+        currColors: array[word] of TColor;
       begin
         RUNNING := true;
         x := 0;
-
-        currColor := low(currColor);
 
         if EnableSoundProcessing(ONE_GAMEHWND) then
         begin
@@ -165,12 +165,12 @@
 
           WriteSamplesToSoundBuffer(@ONE_SOUNDBUFFER);
 
-          WritePixelsToBuffer(@WIN32_BITMAPBUFFER, x, currColor);
+          WritePixelsToBuffer(@WIN32_BITMAPBUFFER, y, currColors[x]);
           DrawPixelBuffer(ONE_DC, @WIN32_BITMAPBUFFER, TMaxWidth(OUTPUT_GAMEWINDOW.Width), TMaxHeight(OUTPUT_GAMEWINDOW.Height));
 
           x+=1;
 
-          currColor := GetRndColor;
+          currColors[x] := GetRndColor;
 
           //StartSpeedMeasureAfterLoopGameLogicEnd;
 

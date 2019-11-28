@@ -110,7 +110,7 @@ implementation
       rng: QWord;
       onebyteFrom16byte: PByte;
       loopIndex, maxIndex: int16;             //this needs to be 2byte long!
-      mappedIndex, globalTColorIndex: byte;   //this is enough for 1byte
+      mappedIndex: byte;   //this is enough for 1byte
       distanceToCurrcolor, distanceToNextcolor: Int16;
       mostRNDColor: TColorset;
       nextColor: TInternalColor;
@@ -119,29 +119,21 @@ implementation
        {$region RNG code}
        rng := xor128_RNG;
 
-       if func_callNr >= MAXBYTELEN_OF_RNDVALUE then
+      if func_callNr >= MAXBYTELEN_OF_RNDVALUE then
        begin
          func_callNr := 0;
          bitshiftPos := bitshiftPos div 2;
-         rng := xor128_RNG xor (rng shr bitshiftPos);
+         rng := xor128_RNG;// xor (rng shr bitshiftPos);
        end;
 
        onebyteFrom16byte := PByte(@rng) + func_callNr;
 
-       {  if onebyteFrom16byte^ is even and this function got called 3 times, divide it by 2,
-          to mamappedPoske a bit more randomness happen
-       }
-       if ((onebyteFrom16byte^ and 1) = 0) and
-          (onebyteFrom16byte^ >= 150)      and
-          (func_callNr = 2)                then
-         onebyteFrom16byte^ := onebyteFrom16byte^ shr 1;
        {$EndRegion RNG code}
 
        {$Region ALGORITHM BASED PROPER INITIALIZATION}
        nextColor := TInternalColor(FIRSTCOLOR);
 
        mappedIndex := 1;
-       globalTColorIndex := 1;
        isCurrColorClosest := false;
 
        maxIndex  := ord(LASTCOLOR);
@@ -166,7 +158,7 @@ implementation
          if (distanceToCurrcolor < distanceToNextcolor) and (not isCurrColorClosest)  then
          begin
            mostRNDColor:= [];
-           mostRNDColor += [TColor(globalTColorIndex)];
+           mostRNDColor += [TColor(mappedIndex)];
            isCurrColorClosest := distanceToCurrcolor < distanceToNextcolor;
          end
 
@@ -181,7 +173,6 @@ implementation
          end;
 
          loopIndex *= 2;
-         globalTColorIndex += 1;
        end;
 
        bitshiftPos += 1;

@@ -117,10 +117,11 @@ interface
             tcRed:    purePixel := CreatePixel(255, 0, 0);
             tcGreen:  purePixel := CreatePixel(0, 255, 0);
             tcBlue:   purePixel := CreatePixel(0, 0, 255);
+            tcCyan:   purePixel := CreatePixel(0, 80, 255);
             tcYellow: purePixel := CreatePixel(230, 255, 0);
-            tcPurple: purePixel := CreatePixel(150, 0, 100);
-            tcBrown:  purePixel := CreatePixel(255, 100, 0);
-            tcGrey:   purePixel := CreatePixel(0, 0, 0);
+            tcPurple: purePixel := CreatePixel(153, 50, 204);
+            tcBrown:  purePixel := CreatePixel(139, 69, 19);
+            tcGrey:   purePixel := CreatePixel(145, 145, 145);
           end;
 
          //column loop
